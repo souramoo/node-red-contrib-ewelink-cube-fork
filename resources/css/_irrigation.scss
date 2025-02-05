@@ -1,0 +1,45 @@
+.irrigation{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    .capacity{
+        width: 20%;
+    }
+    .time{
+        width: 20%;
+    }
+    .volume{
+        width: 80%;
+    }
+    .irrigation-unit{
+        position: absolute;
+        right: 10px;
+        top: 8px;
+    }
+    label{
+        width: 20%;
+    }
+    .irrigation-time{
+        width: 80%;
+        .el-input__prefix{
+            display: none;
+        }
+    }
+    .el-input-number__decrease, .el-input-number__increase{
+        display: none;
+    }
+
+    .el-input__inner{
+        text-align: left;
+    }
+}
+
+.el-input-number__decrease, .el-input-number__increase{
+    display: none;
+}
+
+.card .el-input__inner{
+    text-align: left!important;
+}

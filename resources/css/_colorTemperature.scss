@@ -1,0 +1,30 @@
+.color-temperature{
+    height: 48px;
+    margin: 12px 0;
+    padding: 0 10px;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #ffa205, #fbfdff, #aad3ff);
+}
+
+.color-temperature .el-slider{
+    height: 48px!important;
+}
+
+.color-temperature .el-slider__button-wrapper{
+    height: 48px;
+}
+
+.color-temperature .el-slider:hover .el-slider__button-wrapper{
+    height: 48px;
+    background-color: transparent;
+    overflow: hidden;
+}
+
+.color-temperature .el-slider__bar {
+   display: none;
+}
+
+.color-temperature .el-slider__runway {
+    height: 48px;
+    background-color: transparent!important;
+}

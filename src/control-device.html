@@ -1,0 +1,615 @@
+<script src="resources/node-red-contrib-ewelink-cube/i18n/zh-CN.js"></script>
+<script src="resources/node-red-contrib-ewelink-cube/i18n/en.js"></script>
+
+<script type="module">
+    import { Power } from '/resources/node-red-contrib-ewelink-cube/components/power.js';
+    import { Toggle } from '/resources/node-red-contrib-ewelink-cube/components/toggle.js';
+    import { Percentage } from '/resources/node-red-contrib-ewelink-cube/components/percentage.js';
+    import { MotorControl } from '/resources/node-red-contrib-ewelink-cube/components/motorControl.js';
+    import { Brightness } from '/resources/node-red-contrib-ewelink-cube/components/brightness.js';
+    import { ColorTemperature } from '/resources/node-red-contrib-ewelink-cube/components/colorTemperature.js';
+    import { ColorRgb } from '/resources/node-red-contrib-ewelink-cube/components/colorRgb.js';
+    import { Thermostat } from '/resources/node-red-contrib-ewelink-cube/components/thermostat.js';
+    import { ThermostatTargetSetpoint } from '/resources/node-red-contrib-ewelink-cube/components/thermostatTargetSetpoint.js';
+    import { AirConditionerMode } from '/resources/node-red-contrib-ewelink-cube/components/airConditionerMode.js';
+    import { AntiDirectBlow } from '/resources/node-red-contrib-ewelink-cube/components/antiDirectBlow.js';
+    import { HorizontalSwing } from '/resources/node-red-contrib-ewelink-cube/components/horizontalSwing.js';
+    import { VerticalSwing } from '/resources/node-red-contrib-ewelink-cube/components/verticalSwing.js';
+    import { FanLevel } from '/resources/node-red-contrib-ewelink-cube/components/fanLevel.js';
+    import { FanMode } from '/resources/node-red-contrib-ewelink-cube/components/fanMode.js';
+    import { HorizontalAngle } from '/resources/node-red-contrib-ewelink-cube/components/horizontalAngle.js';
+    import { VerticalAngle } from '/resources/node-red-contrib-ewelink-cube/components/verticalAngle.js';
+    import { LightMode } from '/resources/node-red-contrib-ewelink-cube/components/lightMode.js';
+    import { Eco } from '/resources/node-red-contrib-ewelink-cube/components/eco.js';
+    import { Irrigation } from '/resources/node-red-contrib-ewelink-cube/components/irrigation.js';
+    import { ChildLock } from '/resources/node-red-contrib-ewelink-cube/components/childLock.js';
+    import { WindowDetection } from '/resources/node-red-contrib-ewelink-cube/components/windowDetection.js';
+    import { FrostProtection } from '/resources/node-red-contrib-ewelink-cube/components/frostProtection.js';
+    import { TemperatureCalibration } from '/resources/node-red-contrib-ewelink-cube/components/temperatureCalibration.js';
+    import { Ihost } from '/resources/node-red-contrib-ewelink-cube/components/ihost.js';
+
+    const components = {
+        Power,
+        Toggle,
+        Percentage,
+        MotorControl,
+        Brightness,
+        ColorTemperature,
+        Thermostat,
+        ThermostatTargetSetpoint,
+        AirConditionerMode,
+        AntiDirectBlow,
+        HorizontalSwing,
+        VerticalSwing,
+        FanLevel,
+        FanMode,
+        HorizontalAngle,
+        VerticalAngle,
+        LightMode,
+        Eco,
+        Irrigation,
+        ColorRgb,
+        ChildLock,
+        WindowDetection,
+        FrostProtection,
+        TemperatureCalibration,
+        Ihost
+    };
+
+    Object.entries(components).forEach(([name, component]) => {
+        Vue.component(name, component);
+    });
+</script>
+
+<script type="text/html" data-template-name="control-device">
+    <div class="form-row">
+        <label for="node-input-name" data-i18n="control-device.name"></label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row" style="position:relative">
+        <span class="require">*</span>
+        <label for="node-input-server">Server</label>
+        <input type="text" id="node-input-server" placeholder="Server" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-category" data-i18n="control-device.label.category"></label>
+        <select id="node-input-category" placeholder="Category" style="width:70%"></select>
+    </div>
+    <div class="form-row" style="position:relative">
+        <span class="require">*</span>
+        <label for="node-input-device" data-i18n="control-device.label.device"></label>
+        <select id="node-input-device" placeholder="Device" style="width:70%"></select>
+    </div>
+    <div class="form-row" style="width: 0; height: 0; display: none;">
+        <label for="node-input-list"> List </label>
+        <input type="text" id="node-input-list" />
+    </div>
+    <div class="form-row" style="width: 0; height: 0; display: none;">
+        <label for="node-input-v2Data"> v2Data </label>
+        <input type="text" id="node-input-v2Data" />
+    </div>
+    <div id="app">
+        <header class="header">
+            <span class="required">*</span>
+            <span class="action" data-i18n="control-device.action"></span>
+        </header>
+        <section>
+            <component
+                v-for="item ,index in componentsList"
+                :is="item"
+                :key="index"
+                :node-red="nodeRed"
+                :state="state"
+                :device-data="deviceData"
+                :capabilities="capabilities"
+                :ihost="ihost"
+                :bridge-version="bridgeFwVersion"
+                :component-title="componentTitle"
+                @call-back="changeState"
+                @change-capability="changeCapability"
+                @change-ihost="changeIhost"
+            />
+        </section>
+    </div>
+</script>
+
+<script type="text/javascript">
+    const SERVER_DOM_NAME = '#node-input-server';
+    const V2DATA_DOM_NAME = '#node-input-v2Data';
+    const CATEGORY_DOM_NAME = '#node-input-category';
+    const DEVICE_DOM_NAME = '#node-input-device';
+    const SECTION_DOM_NAME = '#section';
+    const LIST_DOM_NAME = '#node-input-list';
+
+    const DISPLAY_CATEGORY = 'CATEGORY';
+    const DISPLAY_DEVICE = 'DEVICE';
+    const DISPLAY_IHOST = 'ihost';
+    const SELECT_OPTION_ALL = 'all';
+    const CONTROL_SERVER_EMPTY = '_ADD_';
+    const IHOST_DATA_STRUCTURE = {
+        app_name: 'node-red',
+        capabilities: [],
+        display_category: DISPLAY_IHOST,
+        enable_debug_log: false,
+        enable_log: false,
+        firmware_version: '',
+        gid_list: [],
+        idx_in_home: null,
+        idx_in_room: null,
+        link_layer_type: '',
+        manufacturer: 'snoff',
+        model: '',
+        name: DISPLAY_IHOST,
+        online: true,
+        rid: null,
+        serial_number: DISPLAY_IHOST,
+        shown_as: {},
+        state: {},
+        tags: '',
+        type: '',
+    };
+
+    let globalDeviceList = [];
+    let globalNodeRed = null;
+    let globalVue = null;
+    let bridgeName = '';
+    let bridgeFwVersion = 'V1';
+    let componentTitle = 'iHost';
+
+    (function () {
+        RED.nodes.registerType('control-device', {
+            category: 'eWeLink Cube',
+            color: '#9487FB',
+            defaults: {
+                name: {
+                    value: '',
+                },
+                server: {
+                    value: '',
+                    required: true,
+                    type: 'api-server',
+                },
+                list: {
+                    value: '',
+                },
+                category: {
+                    value: '',
+                },
+                device: {
+                    value: '',
+                    required: true,
+                },
+                v2Data: {
+                    value: '{}',
+                },
+            },
+            inputs: 1,
+            outputs: 1,
+            paletteLabel: 'control-device',
+            icon: 'font-awesome/fa-toggle-off',
+            label() {
+                return this.name || 'control-device';
+            },
+            async oneditprepare() {
+                const globalNodeRed = this;
+                globalVue = null;
+                globalDeviceList = [];
+
+                globalVue && globalVue.$destroy();
+                globalVue = await createActionByVue(globalNodeRed);
+
+                if(globalNodeRed._('control-device.language') === 'zh-CN'){
+                    ELEMENT.locale(ELEMENT.lang.zhCN);
+                }else{
+                    ELEMENT.locale(ELEMENT.lang.en);
+                }
+
+                console.log('oldData =======>', $(LIST_DOM_NAME).val());
+
+                if ($(LIST_DOM_NAME).val() !== '' && $(LIST_DOM_NAME).val() !== 'null') {
+                    const oldData = JSON.parse($(LIST_DOM_NAME).val());
+                    const newData = stateTransform.frontEndDataToV2StateData(oldData);
+                    $(V2DATA_DOM_NAME).val(JSON.stringify(newData));
+                    switchErrorHandle(newData, globalNodeRed);
+                    $(LIST_DOM_NAME).val('null');
+
+                    if (globalVue !== null) {
+                        globalVue.generateComponents();
+                        globalVue.modifyV2Data();
+                    }
+                }
+
+                console.log('newData =======>', $(V2DATA_DOM_NAME).val());
+
+                $(SERVER_DOM_NAME).on('change', async () => {
+                    $(CATEGORY_DOM_NAME).get(0).options.length = 0;
+                    $(CATEGORY_DOM_NAME).val('');
+                    $(DEVICE_DOM_NAME).get(0).options.length = 0;
+                    $(DEVICE_DOM_NAME).val('');
+
+                    const serverValue = $(SERVER_DOM_NAME).val();
+                    if (serverValue && serverValue !== CONTROL_SERVER_EMPTY) {
+                        await initMethod(globalNodeRed);
+                        await initGetBridge();
+                    }
+                });
+
+                $(CATEGORY_DOM_NAME).on('change', () => {
+                    $(DEVICE_DOM_NAME).val('');
+                    setDeviceOptionsByCategory();
+
+                    // modify ihsot name
+                    $(DEVICE_DOM_NAME)
+                        .children()
+                        .each(function () {
+                            if ($(this).text() === DISPLAY_IHOST) {
+                                $(this).text(bridgeName);
+                            }
+                        });
+                    if (globalNodeRed.server) $(DEVICE_DOM_NAME).val(globalNodeRed.device);
+
+                    $(V2DATA_DOM_NAME).val(JSON.stringify({}));
+                    if (globalVue !== null) {
+                        globalVue.cleanV2Data();
+                        globalVue.generateComponents();
+                    }
+                });
+
+                $(DEVICE_DOM_NAME).on('change', () => {
+                    $(V2DATA_DOM_NAME).val(JSON.stringify({}));
+                    if (globalVue !== null) {
+                        globalVue.cleanV2Data();
+                        globalVue.generateComponents();
+                    }
+                });
+            },
+            oneditsave() {},
+        });
+    })();
+
+    // 初始化方法
+    async function initMethod(globalNodeRed) {
+        const res = await getDeviceList(globalNodeRed);
+        if (res.error !== 0 || !res.data || !res.data.device_list) return;
+        const deviceList = [...res.data.device_list, ...[IHOST_DATA_STRUCTURE]];
+        globalDeviceList = deviceList;
+        const categoryOptions = getOptionsHtmlByDevice(deviceList, DISPLAY_CATEGORY);
+        $(CATEGORY_DOM_NAME).append(categoryOptions);
+        if (!globalNodeRed.server) return;
+
+        $(CATEGORY_DOM_NAME).val(globalNodeRed.category);
+        if (globalNodeRed.device) {
+            setDeviceOptionsByCategory();
+            $(DEVICE_DOM_NAME).val(globalNodeRed.device);
+            if (globalVue !== null) globalVue.generateComponents();
+        } else {
+            if ($(CATEGORY_DOM_NAME).val() === SELECT_OPTION_ALL) {
+                const allDevice = getOptionsHtmlByDevice(deviceList, DISPLAY_DEVICE);
+                $(DEVICE_DOM_NAME).append(allDevice);
+            }
+        }
+    }
+    async function switchErrorHandle(params, globalNodeRed){
+        const newData = JSON.parse(JSON.stringify(params));
+        const toggle = _.has(newData, ['state', 'toggle'], false);
+        if(toggle){
+            const res = await getDeviceList(globalNodeRed);
+            if (res.error !== 0 || !globalNodeRed.device) return;
+            const deviceData = res.data.device_list.find((item) =>item.serial_number === globalNodeRed.device);
+            const toggleObj = _.get(newData,['state', 'toggle'], []);
+
+            const capabilityToggleKey = deviceData.capabilities.filter((it) => it.capability === 'toggle').map((item) => item.name);
+            const fullSameKey = Object.keys(toggleObj).toString() === capabilityToggleKey.toString();
+            if(fullSameKey)return;
+
+            const obj = {};
+            capabilityToggleKey.forEach((it,idx) =>{
+                obj[it] = toggleObj[Object.keys(toggleObj)[idx]];
+            });
+            _.set(newData,['state','toggle'],obj);
+            console.log('switchErrorHandle newData ===>', newData);
+            $(V2DATA_DOM_NAME).val(JSON.stringify(newData));
+            globalVue && globalVue.modifyV2Data();
+        }
+    }
+    // 获取网关设备列表
+    function getDeviceList(globalNodeRed) {
+        const server = $(SERVER_DOM_NAME).val();
+        const errorRes = { error: 500, data: [] };
+        return new Promise((reslove, reject) => {
+            if (!server || server === CONTROL_SERVER_EMPTY) {
+                reslove(errorRes);
+            }
+            $.ajax({
+                type: 'POST',
+                url: 'ewelink-cube-api-v1/get-device-list',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: server }),
+                success(res) {
+                    if (res.error === 0) {
+                        reslove(res);
+                    } else {
+                        RED.notify(`${globalNodeRed._('control-device.message.connect_fail')}`, { type: 'error' });
+                        reslove(errorRes);
+                    }
+                },
+                error(error) {
+                    RED.notify(`${globalNodeRed._('control-device.message.connect_fail')}`, { type: 'error' });
+                    reslove(errorRes);
+                },
+            });
+        });
+    }
+    // 获取网关信息
+    function getBridge() {
+        const server = $(SERVER_DOM_NAME).val();
+        return new Promise((reslove, reject) => {
+            $.ajax({
+                type: 'POST',
+                url: 'ewelink-cube-api-v1/bridge',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ip: server }),
+                success(res) {
+                    let resData = res.data;
+                    if (res.error === 0) {
+                        $(CATEGORY_DOM_NAME).children().each(function() {
+                            if($(this).text() === DISPLAY_IHOST){
+                                const domain = resData.domain;
+                                for(const item of ['iHost', 'nspanelpro', 'cube']){
+                                    if(domain.indexOf(item.toLowerCase() !== -1)){
+                                        $(this).text(item);
+                                        resData.title = item;
+                                    }
+                                }
+                            }
+                        });
+                        $(DEVICE_DOM_NAME).children().each(function() {
+                            if($(this).text() === DISPLAY_IHOST){
+                                $(this).text(resData.name);
+                            }
+                        });
+                        reslove(resData);
+                    }
+                    reslove({});
+                },
+                error(error) {
+                    reslove({});
+                },
+            });
+        });
+    }
+    // 获取网关安防列表
+    function getBridgeSecurityList() {
+        const server = $(SERVER_DOM_NAME).val();
+        return new Promise((reslove, reject) => {
+            $.ajax({
+                type: 'POST',
+                url: 'ewelink-cube-api-v1/get_security_list',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: server }),
+                success(res) {
+                    if (res.error === 0) {
+                        const secyrityList = res.data.security_list.map((item) => {
+                            item.value = item.sid;
+                            if (item.name === 'home_mode') {
+                                item.name = globalNodeRed._('control-device.SelectOption.home');
+                            } else if (item.name === 'away_mode') {
+                                item.name = globalNodeRed._('control-device.SelectOption.away_home');
+                            } else if (item.name === 'sleep_mode') {
+                                item.name = globalNodeRed._('control-device.SelectOption.sleep');
+                            }
+                            return item;
+                        });
+                        secyrityList.push({
+                            name: node._('control-device.SelectOption.disarmed'),
+                            value: 'disarmed',
+                        });
+                        reslove(secyrityList);
+                    } else {
+                        reslove([]);
+                    }
+                },
+                error(error) {
+                    reslove([]);
+                },
+            });
+        });
+    }
+    // 根据设备列表获取下拉框的选项
+    function getOptionsHtmlByDevice(deviceList, optionType) {
+        if (!deviceList.length) return;
+        const operationDocument = optionType === DISPLAY_CATEGORY ? $(CATEGORY_DOM_NAME) : $(DEVICE_DOM_NAME);
+        operationDocument.get(0).options.length = 0;
+        let optionsHtml = `<option selected="selected" disabled="disabled" style="display:none" value=""></option>`;
+        if (optionType === DISPLAY_CATEGORY) optionsHtml += `<option value="${SELECT_OPTION_ALL}">ALL</option>`;
+        const filterList = [];
+        for (const item of deviceList) {
+            const content = optionType == DISPLAY_CATEGORY ? item.display_category : item.name || item.manufacturer + item.display_category;
+            const value = optionType == DISPLAY_CATEGORY ? item.display_category : item.serial_number;
+            if (optionType === DISPLAY_DEVICE || (optionType === DISPLAY_CATEGORY && !filterList.includes(value))) {
+                optionsHtml += `<option value="${value}">${content}</option>`;
+                if(optionType === DISPLAY_CATEGORY)filterList.push(value);
+            }
+        }
+        return optionsHtml;
+    }
+    // 根据类别渲染设备下拉框
+    function setDeviceOptionsByCategory() {
+        let filterDeviceList = globalDeviceList.filter((item) => item.display_category === $(CATEGORY_DOM_NAME).val());
+        if (filterDeviceList.length === 0) filterDeviceList = globalDeviceList;
+        const deviceOptions = getOptionsHtmlByDevice(filterDeviceList, DISPLAY_DEVICE);
+        $(DEVICE_DOM_NAME).append(deviceOptions);
+    }
+    // 创建全局唯一Vue实例
+    function createActionByVue(globalNodeRed) {
+        return new Promise((reslove, reject) => {
+            const v2Data = JSON.parse($(V2DATA_DOM_NAME).val() || '{}');
+            const myVue = new Vue({
+                el: '#app',
+                data: {
+                    nodeRed: globalNodeRed,
+                    state: v2Data.state || {},
+                    componentsList: [],
+                    deviceData: {},
+                    capabilities: v2Data.capabilities || [],
+                    bridgeFwVersion,
+                    ihost: v2Data.ihost || {},
+                    componentTitle
+                },
+                methods: {
+                    changeState(data, deleteFlag) {
+                        callBackToSaveV2Data(data, deleteFlag);
+                    },
+                    changeCapability(capabilities, deleteFlag) {
+                        let v2Data = JSON.parse($(V2DATA_DOM_NAME).val() || '{}');
+                        if (deleteFlag) v2Data.capabilities = [];
+                        else v2Data.capabilities = capabilities;
+                        $(V2DATA_DOM_NAME).val(JSON.stringify(v2Data));
+                        if (globalVue !== null) globalVue.modifyV2Data();
+                    },
+                    changeIhost(ihost, deleteFlag){
+                        let v2Data = JSON.parse($(V2DATA_DOM_NAME).val() || '{}');
+                        if (deleteFlag) v2Data.ihost = {};
+                        else v2Data.ihost = ihost;
+                        $(V2DATA_DOM_NAME).val(JSON.stringify(v2Data));
+                        if (globalVue !== null) globalVue.modifyV2Data();
+                    },
+                    generateComponents() {
+                        const selectDeviceValue = $(DEVICE_DOM_NAME).val();
+                        const deviceData = globalDeviceList.find((it) => it.serial_number === selectDeviceValue);
+                        if (!deviceData) {
+                            this.componentsList = [];
+                            return;
+                        }
+
+                        this.deviceData = deviceData;
+
+                        if(selectDeviceValue === DISPLAY_IHOST){
+                            this.componentsList = [this.$options.components['Ihost']];
+                            return;
+                        }
+
+                        const capabilities = capabilitiesTransform.v1CapabilityToV2Capability(deviceData.capabilities);
+                        const componentsList = [];
+                        for (const item of capabilities) {
+                            const capaConfigList = config[item.capability];
+                            if (!capaConfigList) continue;
+                            for (const it of capaConfigList) {
+                                const sameCapabilityName = !it.name || it.name === item.name; //相同能力名但是name不同
+                                const temperatureConfigV1 = loadshGet(item, ['configuration','calibration']);
+                                const temperatureConfigV2 = loadshGet(item, ['settings','temperatureCalibration']);
+                                const isTempCalibration = item.capability === 'temperature' && ( temperatureConfigV1 || temperatureConfigV2);
+                                const notDuplicates = !componentsList.includes(it); // 不允许重复组件
+                                if (this.$options.components[it.component] && (sameCapabilityName || isTempCalibration) && notDuplicates) {
+                                    componentsList.push(it);
+                                }
+                            }
+                        }
+
+                        this.componentsList = this.sort(componentsList);;
+                    },
+                    sort(paramsList){
+                        const list = _.sortBy(paramsList, (item) => item.priority);
+                        const componentsList = [];
+                        for(const item of list){
+                            if(!componentsList.includes(item.component)){
+                                componentsList.push(item.component);
+                            }
+                        }
+                        return componentsList;
+                    },
+                    cleanV2Data() {
+                        this.state = {};
+                        this.capabilities = [];
+                        this.ihost = {};
+                    },
+                    modifyV2Data() {
+                        const v2Data = JSON.parse($(V2DATA_DOM_NAME).val());
+                        this.state = v2Data.state || {};
+                        this.capabilities = v2Data.capabilities || [];
+                        this.ihost = v2Data.ihost || {};
+                    },
+                    refreshVersion(){
+                        this.bridgeFwVersion = bridgeFwVersion;
+                        this.componentTitle = componentTitle;
+                    }
+                },
+            });
+            reslove(myVue);
+        });
+    }
+    // 子组件回调修改控制参数
+    function callBackToSaveV2Data(data, deleteFlag) {
+        // let v2Data = JSON.parse($(V2DATA_DOM_NAME).val() || '{}');
+        let v2Data = JSON.parse($(V2DATA_DOM_NAME).val() || '{}');
+
+        if (deleteFlag) {
+            if (!_.isEmpty(v2Data.state)) {
+                let state = v2Data.state;
+                const keys = Object.keys(data);
+                if(keys.length === 0) return;
+                const needDeepDelete = ['mode', 'thermostat-target-setpoint'];
+                if (needDeepDelete.includes(keys[0])) {
+                    for (const item of needDeepDelete) {
+                        if (item !== keys[0]) continue;
+                        const twoLevelKeys = Object.keys(data[item]);
+                        state[item] = _.omit(state[item], [twoLevelKeys[0]]);
+                        if (Object.keys(state[item]).length === 0) {
+                            delete state[item];
+                        }
+                    }
+                } else {
+                    delete state[keys[0]];
+                }
+                v2Data.state = state;
+            }
+            $(V2DATA_DOM_NAME).val(JSON.stringify(v2Data));
+        } else {
+            const saveData = merge(v2Data.state, data);
+            v2Data.state = saveData;
+            $(V2DATA_DOM_NAME).val(JSON.stringify(v2Data));
+        }
+        // 刷新vue子组件内的数据
+        if (globalVue !== null) globalVue.modifyV2Data();
+    }
+
+    async function initGetBridge(){
+        const { fw_version, name, title } = await getBridge();
+        bridgeName = name || DISPLAY_IHOST;
+        if(!fw_version) return;
+        bridgeFwVersion = compareVersion(fw_version, '2.1.0') >= 0 ? 'V2' : 'V1';
+        componentTitle = title || 'iHost';
+        if(globalVue !== null) globalVue.refreshVersion();
+    }
+</script>
+
+<style>
+    #app {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        position: relative;
+        margin: 0 auto;
+    }
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        border-bottom: 1px solid #ccc;
+        padding: 10px;
+    }
+    .required {
+        color: red;
+        font-size: 20px;
+    }
+    .action {
+        height: 40px;
+        line-height: 40px;
+    }
+    section {
+        padding: 10px;
+        margin: 0 auto;
+    }
+    .editor-tray-body {
+        min-width: 574px !important;
+    }
+</style>

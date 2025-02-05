@@ -1,0 +1,30 @@
+.ihost{
+    .item{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .name{
+            min-width: 24%;
+        }
+    }
+    .flex-left{
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        .name{
+            min-width:24%;
+        }
+        .el-input__icon{
+            display: none;
+        }
+    }
+}
+
+.ihost-time-select{
+    .el-time-spinner__wrapper:nth-child(1){
+        display: none!important;
+    }
+    .el-time-spinner.has-seconds .el-time-spinner__wrapper{
+        width: 50%!important;
+    }
+}

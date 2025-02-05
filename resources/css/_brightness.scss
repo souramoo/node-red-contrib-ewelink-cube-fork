@@ -1,0 +1,43 @@
+.brightness-wrap{
+    position: relative;
+    height: 48px;
+    margin-bottom: 12px;
+}
+.brightness-value{
+    position: absolute;
+    top: 63%;
+    left: 10%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    color: #fff;
+    pointer-events: none;
+}
+.brightness-wrap .el-slider__bar {
+    height: 48px;
+    background-color: #1890ff;
+    overflow: hidden;
+}
+
+.brightness-wrap .el-slider-rail {
+    background-color: #f2f2f6;
+    width: 100%;
+}
+
+.brightness-wrap .el-slider__runway {
+    background: #f2f2f6;
+    height: 48px;
+    overflow: hidden;
+    border-radius: 18px;
+}
+
+.brightness-wrap .el-slider__button-wrapper {
+    display: none;
+}
+
+.brightness-wrap .el-slider:hover .el-slider__runway {
+    background-color: #f2f2f6;
+}
+
+.brightness-wrap .el-slider:hover .el-slider__runway {
+    background-color: #f2f2f6;
+}

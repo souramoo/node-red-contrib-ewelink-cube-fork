@@ -1,0 +1,575 @@
+<link rel="stylesheet" href="resources/node-red-contrib-ewelink-cube/css/element.css" />
+<link rel="stylesheet" href="resources/node-red-contrib-ewelink-cube/css/index.css" />
+<script src="resources/node-red-contrib-ewelink-cube/js/vue2.min.js"></script>
+<script src="resources/node-red-contrib-ewelink-cube/js/element.js"></script>
+<script src="resources/node-red-contrib-ewelink-cube/js/config.js"></script>
+<script src="resources/node-red-contrib-ewelink-cube/js/tools.js"></script>
+<script src="resources/node-red-contrib-ewelink-cube/js/capabilitiesTransform.js"></script>
+<script src="resources/node-red-contrib-ewelink-cube/js/stateTransform.js"></script>
+
+<script type="text/html" data-template-name="api-server">
+    <div class="form-row">
+        <label for="node-config-input-name">
+            <i class="fa fa-tag"></i>
+            <span data-i18n="api-server.label.name"></span>
+        </label>
+        <input type="text" id="node-config-input-name">
+    </div>
+    <div class="form-row" style="position: relative;">
+        <span class="require">*</span>
+        <label for="node-config-input-ip">
+            <i class="fa fa-server"></i>
+            <span data-i18n="api-server.label.ip"></span>
+        </label>
+        <div style="display: inline-flex; width: 70%;position:relative">
+            <input type="text" id="node-config-input-ip" style="width: 100%; margin-right: 10px;" data-i18n="[placeholder]api-server.message.place_input">
+            <!-- hidden input, if node-config-input-ip is a domain name, then use node-config-input-ipaddr -->
+            <input type="text" id="node-config-input-ipaddr" style="display: none;">
+            <ul class="ip-search-ul"></ul>
+            <div class="ip-arrow"><i class="triangle"></i></div>
+            <a class="red-ui-button" id="node-config-input-search-btn">
+                <i class="fa fa-search"></i>
+            </a>
+        </div>
+        <div id="error-hint-input-ip" style="font-size: 12px; color: red; padding-left: 104px;"></div>
+    </div>
+    <div class="form-row">
+        <label>
+            <i class="fa fa-id-badge"></i>
+            <span data-i18n="api-server.label.token"></span>
+        </label>
+        <button id="node-config-input-get-token-btn" type="button" class="red-ui-button" style="width: 70%;background-color: #ccc;color: #ffff!important;" disabled>
+            <!-- Spin icon -->
+            <!-- <i class="fa fa-search spinner"></i> -->
+            <span class="btn-text" data-i18n="api-server.message.get_token"></span>
+            <span class="count-down" style="margin-left: 8px;"></span>
+        </button>
+        <!-- Store token -->
+        <input type="text" id="node-config-input-token" style="width: 0; height: 0; display: none;">
+        <!-- Store token IP address -->
+        <input type="text" id="node-config-input-token-ipaddr" style="display: none;">
+        <div id="error-hint-get-token" style="font-size: 12px; color: red; padding-left: 104px;"></div>
+    </div>
+    <div class="illustrate">
+        <p class="ip-address"><strong data-i18n="ip-illustrate"></strong></p>
+        <p class="ip-address" data-i18n="api-server.label.confirm_local_network"></p>
+        <p class="ip-address" data-i18n="api-server.label.input_ip_port"></p>
+        <p class="ip-address" data-i18n="api-server.label.nspro_input_ip_port"></p>
+    </div>
+</script>
+
+<script type="text/javascript">
+//ul show or hidden
+let ihostIpListVisible = false;
+let outerNode = null;
+let ihostList = null;
+const API_PREFIX = 'ewelink-cube-api-v1';
+;(function () {
+    const DOM_ID_SEARCH_BTN = '#node-config-input-search-btn';
+    const DOM_ID_SEARCH_BTN_ICON = `${DOM_ID_SEARCH_BTN} i`;
+    const DOM_ID_GET_TOKEN_BTN = '#node-config-input-get-token-btn';
+    const DOM_ID_GET_TOKEN_BTN_ICON = `${DOM_ID_GET_TOKEN_BTN} i`;
+    const DOM_ID_GET_TOKEN_BTN_TEXT = `${DOM_ID_GET_TOKEN_BTN} .btn-text`;
+    const DOM_ID_GET_TOKEN_COUNT_DOWN = `${DOM_ID_GET_TOKEN_BTN} .count-down`;
+    const DOM_ID_INPUT_NAME = '#node-config-input-name';
+    const DOM_ID_INPUT_IP = '#node-config-input-ip';
+    const DOM_ID_INPUT_IPADDR = '#node-config-input-ipaddr';
+    const DOM_ID_INPUT_TOKEN = '#node-config-input-token';
+    const DOM_ID_INPUT_TOKEN_IPADDR = '#node-config-input-token-ipaddr';
+    const DOM_ID_ERROR_HINT_INPUT_IP = '#error-hint-input-ip';
+    const DOM_ID_ERROR_HINT_GET_TOKEN = '#error-hint-get-token';
+    const DOM_IP_SEARCH_LIST = '.ip-search-ul';
+    const DOM_IP_ARROW = '.ip-arrow';
+    const DOM_TRIANGLE = '.triangle';
+
+    // Count down timer
+    let countDownTimerId = null;
+
+    /**
+     * Set search button icon spin state.
+     */
+    function setSearchBtnIconSpin(val) {
+        if (val) {
+            $(DOM_ID_SEARCH_BTN_ICON).addClass('spinner');
+        } else {
+            $(DOM_ID_SEARCH_BTN_ICON).removeClass('spinner');
+        }
+    }
+
+    /**
+     * Set get token button spin state.
+     */
+    function setGetTokenBtnSpin(val) {
+        if (val) {
+            disableGetTokenBtn();
+            $(DOM_ID_GET_TOKEN_BTN_ICON).css('display', 'inline-block');
+            // $(DOM_ID_GET_TOKEN_BTN_TEXT).css('display', 'none');
+        } else {
+            $(DOM_ID_GET_TOKEN_BTN_ICON).css('display', 'none');
+            // $(DOM_ID_GET_TOKEN_BTN_TEXT).css('display', 'inline-block');
+        }
+    }
+
+    /**
+     * Enable get token button.
+     */
+    function enableGetTokenBtn() {
+        $(DOM_ID_GET_TOKEN_BTN).prop('disabled', false);
+        $(DOM_ID_GET_TOKEN_BTN).css('background-color','#1890ff');
+    }
+
+    /**
+     * Disable get token button.
+     */
+    function disableGetTokenBtn() {
+        $(DOM_ID_GET_TOKEN_BTN).prop('disabled', true);
+        $(DOM_ID_GET_TOKEN_BTN).css('background-color','#ccc');
+    }
+
+    /**
+     * Test token.
+     */
+    function testToken(ip, token) {
+        $.ajax({
+            type: 'POST',
+            url: `${API_PREFIX}/test-token`,
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ip, token }),
+            success(res) {
+                if (res.error !== 0) {
+                    // wrong token
+                    enableGetTokenBtn();
+                }else{
+                    $(DOM_ID_GET_TOKEN_BTN_TEXT).text(outerNode._('api-server.message.has_token'));
+                }
+            },
+            error(err) {
+                console.error(err);
+                enableGetTokenBtn();
+            }
+        });
+    }
+
+    /** init query mdns */
+    function queryMdns(){
+        $.ajax({
+            type: 'POST',
+            url: `${API_PREFIX}/query/mdns`,
+            contentType: 'application/json; charset=utf-8',
+            data: {},
+            success(res) {
+                console.log('init query mdns',res);
+            },
+            error(err) {}
+        });
+    }
+
+    /**
+     * Test valid hostname
+     *
+     * testValidHost('192.168.3.12') => true
+     * testValidHost('1.1.1.1.1.1') => false
+     * testValidHost('ihost.local') => true
+     * testValidHost('ihost-xxxxx.local') => true
+     */
+    function testValidHost(input) {
+        const host = input.toLowerCase();
+        let validIpRegex;
+        if(input.indexOf(':')!== -1){
+            validIpRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$/;
+        }else{
+            validIpRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        }
+        const validIhostName = (host.startsWith('ihost') || host.startsWith('cube')  || host.startsWith('nspanelpro')) && host.endsWith('.local');
+        if (!validIpRegex.test(host) && !validIhostName && host !== 'ihost' && host !== 'nspanelpro' && host !== 'ewelinksmartpanel' && host !== 'cube') {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Search button click event handler.
+     */
+    function searchBtnOnClickHandler() {
+        const node = this;
+        const ip = $(DOM_ID_INPUT_IP).val().trim();
+        const token = $(DOM_ID_INPUT_TOKEN).val();
+        if (!ip) {
+            $(DOM_ID_ERROR_HINT_INPUT_IP).text(node._('api-server.message.please_input_ip'));
+            return;
+        } else {
+            if (!testValidHost(ip)) {
+                $(DOM_ID_ERROR_HINT_INPUT_IP).text(node._('api-server.message.invalid_ip'));
+                return;
+            } else {
+                setSearchBtnIconSpin(true);
+                $(DOM_ID_ERROR_HINT_INPUT_IP).text('');
+
+                $.ajax({
+                    type: 'POST',
+                    url: `${API_PREFIX}/get-bridge-info`,
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ ip }),
+                    success(res) {
+                        if (typeof res !== 'object') {
+                            console.log('not object');
+                        } else if (res.error !== 0) {
+                            $(DOM_ID_ERROR_HINT_INPUT_IP).text(node._('api-server.message.request_failed'));
+                        } else {
+                            RED.notify(node._('api-server.message.connect_success'), { type: 'success '});
+                            if (token) {
+                                testToken(ip, token);
+                            } else {
+                                enableGetTokenBtn();
+                                $(DOM_ID_GET_TOKEN_BTN_TEXT).text(node._('api-server.message.get_token'));
+                            }
+                        }
+                        setSearchBtnIconSpin(false);
+                    },
+                    error(err) {
+                        console.error(err);
+                        $(DOM_ID_ERROR_HINT_INPUT_IP).text(node._('api-server.message.request_failed'));
+                        setSearchBtnIconSpin(false);
+                        enableGetTokenBtn();
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Whether get token button exist.
+     */
+    function getTokenBtnExist() {
+        return $(DOM_ID_GET_TOKEN_BTN).length !== 0;
+    }
+
+    /**
+     * Format count.
+     */
+    function formatCount(count) {
+        const min = Math.floor(count / 60);
+        const sec = count % 60;
+        return `(${min}min${sec}s)`;
+    }
+
+    /**
+     * Set count down timer.
+     */
+    function setCountDown() {
+        let count = 300;
+        // Count 1 time.
+        $(DOM_ID_GET_TOKEN_COUNT_DOWN).text(`${formatCount(--count)}`);
+        countDownTimerId = setInterval(() => {
+            if (count > 0 && getTokenBtnExist()) {
+                $(DOM_ID_GET_TOKEN_COUNT_DOWN).text(`${formatCount(--count)}`);
+            } else {
+                count = 300;
+                $(DOM_ID_GET_TOKEN_COUNT_DOWN).text('');
+                clearInterval(countDownTimerId);
+            }
+        }, 1000);
+    }
+
+    /**
+     * Unset count down timer.
+     */
+    function unsetCountDown() {
+        $(DOM_ID_GET_TOKEN_COUNT_DOWN).text('');
+        clearInterval(countDownTimerId);
+    }
+
+    /**
+     * Get token button click event handler.
+     */
+    function getTokenBtnOnClickHandler() {
+        const node = this;
+        let ip = $('#node-config-input-ip').val().trim();
+        // let ip = $('#node-config-input-ip1').val().trim();
+        if (!ip) {
+            $(DOM_ID_ERROR_HINT_INPUT_IP).text(node._('api-server.message.please_input_ip'));
+            return;
+        }
+
+        if( ihostList !== null && ihostList.length>0){
+            for(const item of ihostList){
+                if(item.name === ip){
+                    ip = item.ip;
+                }
+            }
+        }
+        console.log('get token 的 IP',ip);
+
+        $(DOM_ID_ERROR_HINT_INPUT_IP).text('');
+        setGetTokenBtnSpin(true);
+        setCountDown();
+
+        $.ajax({
+            type: 'POST',
+            url: `${API_PREFIX}/get-bridge-token`,
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ip }),
+            success(res) {
+                console.log(res);
+                if (res.error === 0) {
+                    $(DOM_ID_ERROR_HINT_GET_TOKEN).text('');
+                    $(DOM_ID_INPUT_TOKEN).val(res.data.token);
+                    $(DOM_ID_INPUT_TOKEN_IPADDR).val(ip);
+                    $(DOM_ID_GET_TOKEN_BTN_TEXT).text(node._('api-server.message.has_token'));
+                    RED.notify(node._('api-server.message.get_token_success'), { type: 'success '});
+                } else {
+                    $(DOM_ID_ERROR_HINT_GET_TOKEN).text(node._('api-server.message.request_failed'));
+                }
+                setGetTokenBtnSpin(false);
+                unsetCountDown();
+            },
+            error(err) {
+                console.log(err);
+                setGetTokenBtnSpin(false);
+                unsetCountDown();
+            }
+        })
+    }
+
+    /**
+     * show or hidden ip list
+    */
+    // function focusIp(){
+    //     ihostIpListVisible = true;
+    //     $(DOM_IP_SEARCH_LIST).css('display','block');
+    //     $(DOM_TRIANGLE).css('rotate','180deg');
+    // }
+    // function blurIp(){
+    //     setTimeout(()=>{
+    //         ihostIpListVisible = false;
+    //         $(DOM_IP_SEARCH_LIST).css('display','none');
+    //         $(DOM_TRIANGLE).css('rotate','0deg');
+    //     },300);
+    // }
+    function showIpList(){
+        ihostIpListVisible = !ihostIpListVisible;
+        if(ihostIpListVisible){
+            renderIpListOption();
+            $(DOM_IP_SEARCH_LIST).css('display','block');
+            $(DOM_TRIANGLE).css('rotate','180deg');
+        }else{
+            $(DOM_IP_SEARCH_LIST).css('display','none');
+            $(DOM_TRIANGLE).css('rotate','0deg');
+        }
+    }
+    function renderIpListOption(){
+        $(DOM_IP_SEARCH_LIST).empty();
+        let templateLi = '';
+        $.ajax({
+            type: 'POST',
+            url: `${API_PREFIX}/get-local-ip-list`,
+            contentType: 'application/json; charset=utf-8',
+            data: {},
+            success(res) {
+                if (res.error === 0) {
+                    ihostList = res.data.ihostList;
+                    console.log('ihostlist----------->',ihostList);
+                    for(const item of res.data.ihostList){
+                        // Only display domain name starts with ihost- and ends with .local
+                        /* TODO: release this code after next version
+                        if (item.name.startsWith('ihost-') && item.name.endsWith('.local')) {
+                            templateLi+=`<li class="ip-search-li" value="${item.ip}" onClick="selectIp(this)">${item.name}</li>`;
+                        }
+                        */
+                        templateLi+=`<li class="ip-search-li" value="${item.ip}" onClick="selectIp(this)">${item.name}</li>`;
+                    }
+                    $(DOM_IP_SEARCH_LIST).append(templateLi);
+                }
+            },
+            error(err) {}
+        });
+    }
+
+    function ipChangeHandler(e){
+        disableGetTokenBtn();
+        $(DOM_ID_GET_TOKEN_BTN_TEXT).text(outerNode._('api-server.message.get_token'));
+    }
+
+    // Emit all error logs.
+    RED.comms.subscribe('EVENT_NODE_RED_ERROR', (topic, payload) => {
+        RED.notify(payload.msg, { type: 'error' });
+    });
+
+    RED.nodes.registerType('api-server', {
+        category: 'config',
+        defaults: {
+            name: {
+                value: '',
+            },
+            ip: {
+                value: '',
+                required: true
+            },
+            ipaddr: {
+                value: '',
+            },
+            token: {
+                value: '',
+                required: true
+            },
+            tokenIpaddr: {
+                value: ''
+            }
+        },
+        label() {
+            return this.name || this.ip || 'Token';
+        },
+        oneditprepare() {
+            const node = this;
+            outerNode = this;
+
+            // Set default name if input field is empty.
+            if ($(DOM_ID_INPUT_NAME).val() === '') {
+                $(DOM_ID_INPUT_NAME).val('Token');
+            }
+
+            queryMdns();
+
+            // Hide get token button icon.
+            $(DOM_ID_GET_TOKEN_BTN_ICON).css('display', 'none');
+
+            // Set search button click event.
+            $(DOM_ID_SEARCH_BTN).on('click', searchBtnOnClickHandler.bind(this));
+
+            // Set get token button click event.
+            $(DOM_ID_GET_TOKEN_BTN).on('click', getTokenBtnOnClickHandler.bind(this));
+
+            // Set get token button text.
+            const token = $(DOM_ID_INPUT_TOKEN).val();
+            if (token) {
+                $(DOM_ID_INPUT_TOKEN_IPADDR).val(node.ipaddr);
+                setTimeout(() => {
+                    $(DOM_ID_GET_TOKEN_BTN_TEXT).text(node._('api-server.message.has_token'));
+                }, 0);
+            }
+
+
+            $(DOM_ID_INPUT_IP).on('change', ipChangeHandler);
+            $(DOM_IP_ARROW).on('click',showIpList);
+        },
+        oneditsave() {
+            // Cache api server node data when user clicks `save` button.
+            const id = this.id;
+            const name = $(DOM_ID_INPUT_NAME).val().trim();
+            let ip = $(DOM_ID_INPUT_IP).val().trim();
+            if( ihostList !== null && ihostList.length > 0){
+                //localName change ip
+                for(const item of ihostList){
+                    if(item.name === ip){
+                        $(DOM_ID_INPUT_IPADDR).val(item.ip);
+                        ip = item.ip;
+                    }
+                }
+            }
+            const token = $(DOM_ID_INPUT_TOKEN).val().trim();
+            $.ajax({
+                type: 'POST',
+                url: `${API_PREFIX}/cache/add-api-server-node`,
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    id,
+                    name,
+                    ip,
+                    token
+                })
+            });
+        },
+        oneditdelete() {
+            // Remove api server node data from cache when user clicks `delete` button.
+            const id = this.id;
+            $.ajax({
+                type: 'POST',
+                url: `${API_PREFIX}/cache/remove-api-server-node`,
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id })
+            });
+        }
+    });
+})();
+function selectIp(that){
+    // $('#node-config-input-ip').val($(that).attr("value"));
+    $('#node-config-input-ip').val($(that).text());
+    ihostIpListVisible = false;
+    $('.triangle').css('rotate','0deg');
+    $('.ip-search-ul').css('display','none');
+
+    if ($(that).attr('value') !== $('#node-config-input-token-ipaddr').val()) {
+        $('#node-config-input-get-token-btn').prop('disabled', false);
+        $('#node-config-input-get-token-btn').css('background-color','#1890ff');
+        $('#node-config-input-get-token-btn .btn-text').text(outerNode._('api-server.message.get_token'));
+    } else {
+        $('#node-config-input-get-token-btn').prop('disabled', true);
+        $('#node-config-input-get-token-btn').css('background-color','#cccccc');
+        $('#node-config-input-get-token-btn .btn-text').text(outerNode._('api-server.message.has_token'));
+    }
+}
+</script>
+
+<style>
+    .require{
+        position:absolute;
+        left: -8px;
+        top: 10px;
+        color: red;
+        font-size: 20px;
+    }
+    .ip-search-ul{
+        position: absolute;
+        top:36px;
+        left:-26px;
+        width:87%;
+        min-height:20px;
+        max-height:200px;
+        background-color: #FFFFFF;
+        border-radius: 10px;
+        display: none;
+        border:1px solid #ccc;
+        z-index: 99;
+        cursor: pointer;
+        overflow: auto;
+        overflow-x: hidden;
+    }
+    .ip-search-li{
+        height:20px;
+        font-size: 15px;
+        padding:4px 10px 4px 6px;
+        list-style: none;
+    }
+    .ip-search-li:hover{
+        background-color: #1967d2;
+        color: #FFFFFF;
+    }
+    .ip-arrow{
+        position:absolute;
+        right:55px;
+        top:8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width:18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+    .triangle {
+        width: 0;
+        height: 0;
+        border-top: 5px solid #ccc;
+        border-right: 5px solid transparent;
+        border-left: 5px solid transparent;
+    }
+    .illustrate{
+        width: 450px;
+        margin-top: 40px;
+    }
+    .ip-address{
+        padding-left: 15px;
+    }
+</style>

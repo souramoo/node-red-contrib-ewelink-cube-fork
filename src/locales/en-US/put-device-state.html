@@ -1,0 +1,41 @@
+<script type="text/markdown" data-help-name="put-device-state">
+Update the state of devices registered to iHost via register-device node.
+### Configuration
+
+* Name - Node name
+
+* Server - Server node
+
+* Type - Device type
+
+* Device - Device that has been registered to iHost via register-device node
+
+### Input
+
+Device state info in JSON format. [View docs](https://ewelink.cc/ewelink-cube/introduce-open-api/document/) for more device capabilities.
+
+Example:
+```javascript
+{
+    "power": {
+        "powerState": "on"
+    }
+}
+```
+
+### Output
+
+Device status response result
+
+Example:
+``` javascript
+{
+    "header":{
+        "name":"Response",
+        "message_id":"aae8b8c9-f124-49383-8c23-2fb01e69140d1",
+        "version":"1"
+    },
+    "payload":{}
+}
+```
+</script>

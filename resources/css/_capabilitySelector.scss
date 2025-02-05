@@ -1,0 +1,48 @@
+.capability-selector {
+    .cap-selector {
+        &.error {
+            .el-input {
+                input {
+                    border-color: #d6615f;
+                }
+            }
+        }
+    }
+
+    .config-item {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 12px;
+        &:last-of-type { margin-bottom: 0; }
+        > span {
+            width: 90px;
+        }
+        .operation-area {
+            flex: 1;
+            position: relative;
+
+            > .el-input {
+                width: 100%;
+                input {
+                    width: 100%;
+                }
+                &.error {
+                    input {
+                        border-color: #d6615f;
+                    }
+                }
+            }
+
+            .config-selector {
+                &.error {
+                    .el-input {
+                        input {
+                            border-color: #d6615f;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

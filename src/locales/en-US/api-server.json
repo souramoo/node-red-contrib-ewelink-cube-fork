@@ -1,0 +1,24 @@
+{
+    "api-server": {
+        "label": {
+            "name": "Name",
+            "ip": "IP",
+            "token": "Token",
+            "confirm_local_network":"Please select a server from the list. If unable to select, ensure the server is on the same LAN and try the following methods:",
+            "input_ip_port":"To search for iHost, you can enter the IP and port. e.g. 255.255.1.255:80",
+            "nspro_input_ip_port":"To search for NSPanel-Pro, you can enter the IP and port. e.g. 255.255.1.255:8081",
+            "ip-illustrate":"Note about IP Address"
+        },
+        "message": {
+            "get_token": "GET TOKEN",
+            "please_input_ip": "Please input IP",
+            "invalid_ip": "Invalid IP",
+            "request_failed": "IP connection failed",
+            "get_token_success": "Get token success",
+            "connect_success": "Connect success",
+            "connect_fail": "Failed to connect. Please check Server configuration. ",
+            "has_token": "HAS TOKEN",
+            "place_input":"Please select or enter"
+        }
+    }
+}

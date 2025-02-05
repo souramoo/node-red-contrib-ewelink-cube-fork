@@ -1,0 +1,15 @@
+{
+    "put-device-state": {
+        "label": {
+            "name": "Name",
+            "server":"Server",
+            "category":"Category",
+            "device":"Device",
+            "state":"State"
+        },
+        "message": {
+            "connect_fail": "Failed to connect. Please check Server configuration. ",
+            "node_execution_failed":"Failed to execute. Please check node input information."
+        }
+    }
+}

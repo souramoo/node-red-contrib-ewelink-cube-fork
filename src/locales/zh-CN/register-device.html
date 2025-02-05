@@ -1,0 +1,52 @@
+<script type="text/markdown" data-help-name="register-device">
+本示例适用于 iHost V2.1.0 及以上版本。
+注册一个虚拟设备至iHost中，用以关联控制Node-Red设备。
+
+### 配置
+
+* 名称 - 节点名称
+
+* 服务器 - 服务器节点
+
+* 设备 ID - 注册设备的 ID，英文字母和数字组合
+
+* 设备名称 - 注册设备的名称
+
+* 类别 - 注册设备的类别
+
+* 能力 - 设备支持的能力组合
+
+* 制造商 - 设备的制造商
+
+* 型号 - 注册设备的型号
+
+* 固件版本 - 设备当前固件版本
+
+* 服务 IP - 关联的Node-Red设备服务IP
+
+* 附加信息 - 设备的自定义信息
+
+* 设备初始状态 - 注册设备的初始状态，能力名称及其可选值[请查看参考文档](https://ewelink.cc/ewelink-cube/introduce-open-api/document/)
+
+### 输出
+
+注册接口返回值及回调参数。
+
+示例：
+``` javascript
+{
+    "header":{
+        "name":"Response",
+        "message_id":"766234ac-a522-481f-8eb0-1057ec52fce9",
+        "version":"1"
+    },"payload":{
+        "endpoints":[
+            {
+                "serial_number":"6c29a488-42da-4375-a908-f724fca0e207",
+                "third_serial_number":"fef8f0a0-67d1-47e5-b871-9cece65e954b"
+            }
+        ]
+    }
+}
+```
+</script>

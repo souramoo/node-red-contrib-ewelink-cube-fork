@@ -1,0 +1,24 @@
+{
+    "api-server": {
+        "label": {
+            "name": "名称",
+            "ip": "IP 地址",
+            "token": "密钥",
+            "confirm_local_network":"请使用下拉列表进行选择服务器，若无法选择对应服务器，请确保服务器处于同一局域网中，并尝试以下操作解决：",
+            "input_ip_port":"对于iHost设备，可在输入框中输入设备IP和端口（例：255.255.1.255:80）进行搜索；",
+            "nspro_input_ip_port":"对于NS-Pro设备，可在输入框中输入设备IP和端口（例：255.255.1.255:8081）进行搜索设备",
+            "ip-illustrate":"IP地址说明"
+        },
+        "message": {
+            "get_token": "获取密钥",
+            "please_input_ip": "请输入 IP 地址",
+            "invalid_ip": "无效的 IP 地址",
+            "request_failed": "IP连接失败",
+            "get_token_success": "获取密钥成功",
+            "connect_success": "连接成功",
+            "connect_fail": "Server已失去连接，请检查节点server配置",
+            "has_token": "已获取密钥",
+            "place_input":"请选择或输入"
+        }
+    }
+}

@@ -1,0 +1,21 @@
+.toggle{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.toggle:last-child{
+    margin-bottom: 0;
+}
+
+.toggle-label{
+    width:15%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toggle-select{
+    width: 85%;
+}

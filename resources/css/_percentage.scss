@@ -1,0 +1,25 @@
+.percentage{
+    margin-top:12px;
+    position: relative;
+}
+.percentage-wrap{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.percentage-slider{
+    width: 100%;
+}
+.percentage-word{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.el-slider{
+    height: 30px !important;
+}
+.percentage-value{
+    height: 30px;
+    line-height: 30px;
+    margin:5px 0 0 8px;
+}

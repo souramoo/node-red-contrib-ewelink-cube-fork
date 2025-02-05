@@ -1,0 +1,857 @@
+<script type="text/javascript">
+    function delItem(Dom) {
+        $(Dom).parents('#main-area').remove();
+        // saveAddtionState();
+    }
+
+    function saveAddtionState() {
+        let saveData = '';
+        const ADDTION_STATE_ARRAY = '.node-input-state-class';
+        const NODE_SAVE_DATA = '#node-input-list';
+        $(ADDTION_STATE_ARRAY).each(function (index, item) {
+            if ($(this).val()) {
+                if (index !== $(ADDTION_STATE_ARRAY).length - 1) {
+                    saveData += $(this).val() + ',';
+                } else {
+                    saveData += $(this).val();
+                }
+            }
+        });
+        $(NODE_SAVE_DATA).val(saveData);
+    }
+    (function () {
+        const DOM_ID_INPUT_DEVICE = '#node-input-device';
+        const DOM_ID_INPUT_CATEGORY = '#node-input-category';
+        const DOM_ID_INPUT_SERVER = '#node-input-server';
+        const DOM_ID_INPUT_STATE = '#node-input-state';
+        const DOM_ID_INPUT_SAVE_DATA = '#node-input-list';
+        const NODE_INPUT_STATE_CLASS = '.node-input-state-class'
+        const SERVER_EMPTY = '_ADD_';
+        const ADD_ITEM = 'ADD_ITEM';
+        const INIT_ITEM = 'INIT_ITEM';
+        let tempList = [];
+        let outer_node = null;
+
+        function renderOptions(optionList) {
+            $(DOM_ID_INPUT_DEVICE).get(0).options.length = 0;
+            if (!optionList.length || optionList.length < 1) return '';
+            var optionStr = '<option selected="selected" disabled="disabled" style="display:none" value=""></option><option value="all">All</option>';
+            for (const item of optionList) {
+                optionStr += '<option' + ' value=' + item.serial_number + '>' + (item.name || item.manufacturer + item.display_category) + '</option>';
+            }
+            return optionStr;
+        }
+
+        function getDeviceList(node) {
+            const server = $(DOM_ID_INPUT_SERVER).val();
+            $.ajax({
+                type: 'POST',
+                url: 'ewelink-cube-api-v1/get-device-list',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: server }),
+                success(res) {
+                    if (res.error === 0) {
+                        tempList = [];
+                        let deviceList = res.data.device_list;
+                        for (const item of deviceList) {
+                            let params = {
+                                serial_number: item.serial_number,
+                                display_category: item.display_category,
+                                name: item.name,
+                                manufacturer: item.manufacturer,
+                                state: item.state,
+                                capabilities:item.capabilities
+                            };
+                            tempList.push(params);
+                        }
+
+                        tempList.push({
+                            serial_number: 'ihost',
+                            display_category: 'ihost',
+                            name: 'ihost',
+                            manufacturer: 'ihost',
+                            state: 'ihost',
+                            capabilities: [],
+                            tags: null,
+                        })
+
+                        renderDeviceOption(node);
+
+                        const deviceVal = $(DOM_ID_INPUT_DEVICE).val();
+                        if (deviceVal && deviceVal !== 'all')renderStateOption(node);
+
+                        getBridgeName();
+
+                        $('#state').show();
+                        if (deviceVal === 'all') {
+                            $(DOM_ID_INPUT_STATE).get(0).options.length = 0;
+                            $(DOM_ID_INPUT_STATE).append('<option selected="selected" disabled="disabled" style="display:none" value=""></option><option value="all">All</option>');
+                            $(DOM_ID_INPUT_STATE).val(node.state);
+                            $('#state').hide();
+                        }
+                        node.list && $(NODE_INPUT_STATE_CLASS).remove() && $('#main-area').eq(0).nextAll().remove() && renderAddtionState();
+                    }else{
+                        if(server && server!==SERVER_EMPTY){
+                            RED.notify(`${node._('event-state.message.connect_fail')}`, { type: 'error' });
+                        }
+                    }
+                },
+                error(error) {
+                    if(server && server!==SERVER_EMPTY){
+                        RED.notify(`${node._('event-state.message.connect_fail')}`, { type: 'error' });
+                    }
+                },
+            });
+        }
+
+        function renderDeviceOption(node) {
+            const deviceOption = renderOptions(tempList);
+            $(DOM_ID_INPUT_DEVICE).append(deviceOption);
+            $(DOM_ID_INPUT_DEVICE).val(node.device);
+        }
+
+        function renderStateOption(node) {
+            $(DOM_ID_INPUT_STATE).get(0).options.length = 0;
+            let template = getStateOption(INIT_ITEM).template;
+            $(DOM_ID_INPUT_STATE).append(template);
+            //Compatibility with old version toggle capability
+            const device = tempList.find((item)=>item.serial_number === $(DOM_ID_INPUT_DEVICE).val());
+            if(node.state === 'toggle' && device.display_category !== 'thermostat'){
+                $(DOM_ID_INPUT_STATE).append(
+                    `<option selected="selected" disabled="disabled" value="toggle">${outer_node._('event-state.state.toggle')}</option>`
+                )
+            }
+            node.state && $(DOM_ID_INPUT_STATE).val(node.state);
+        }
+
+        function addItem() {
+            let { stateLength , template } = getStateOption(ADD_ITEM);
+            if($(DOM_ID_INPUT_STATE).val() === 'all'){
+                console.log('all');
+                return;
+            }
+            if ($('#state').children().length >= stateLength) {
+                RED.notify('Limit exceeded', { type: 'error' });
+                return;
+            }
+
+            if($(DOM_ID_INPUT_DEVICE).val() === 'ihost'){
+                console.log('ihost');
+                template = `
+                            <option selected="selected" disabled="disabled" style="display:none" value="" label=""></option>
+                            <option value="arm_state">${outer_node._('event-state.state.Arm_disarm')}</option>
+                            <option value="alarm_state">${outer_node._('event-state.state.trigger_alarm')}</option>
+                        `
+            }
+
+            $('#state').append(
+                `<div id="main-area">
+                    <div class="right-area" style="margin-top:10px">
+                        <select class="node-input-state-class" name="node-input-state" style="width:310px" onChange="saveAddtionState()">
+                            ${template}
+                        </select>
+                        <button class="del-item-btn" onclick="delItem(this)" style="background-color: #FF335D;color: white">-</button>
+                    </div>
+                </div>
+                `
+            );
+        }
+
+        function renderAddtionState() {
+            const stateData = $(DOM_ID_INPUT_SAVE_DATA).val();
+            if (!stateData) return;
+            const addtionList = stateData.split(',');
+            addtionList.forEach((item,index) => {
+                $('#state').append(
+                    `<div id="main-area">
+                        <div class="right-area" style="margin-top:10px">
+                            <select class="node-input-state-class" name="node-input-state" style="width:310px" onChange="saveAddtionState()">
+                                ${getStateOption(INIT_ITEM).template}
+                            </select>
+                            <button class="del-item-btn" onclick="delItem(this)" style="background-color: #FF335D;color: white">-</button>
+                        </div>
+                     </div>
+                    `
+                );
+            });
+            const device = tempList.find((item)=>item.serial_number === $(DOM_ID_INPUT_DEVICE).val());
+            console.log('device=============>',device);
+            $(NODE_INPUT_STATE_CLASS).each(function (index, item) {
+                // Compatibility with old version toggle capability
+                if(addtionList[index] === 'toggle' && device.display_category !== 'thermostat'){
+                    $('.node-input-state-class').append(
+                        `<option selected="selected" disabled="disabled" value="toggle">${outer_node._('event-state.state.toggle')}</option>`
+                    )
+                }
+                $(this).val(addtionList[index]);
+            });
+        }
+
+        function getStateOption(type) {
+
+            if($(DOM_ID_INPUT_DEVICE).val() === 'ihost'){
+                return {
+                    template:`
+                            <option selected="selected" disabled="disabled" style="display:none" value="" label=""></option>
+                            <option value="all">All</option>
+                            <option value="arm_state">${outer_node._('event-state.state.Arm_disarm')}</option>
+                            <option value="alarm_state">${outer_node._('event-state.state.trigger_alarm')}</option>
+                        `,
+                    stateLength:2
+                };
+            }
+
+            const STATE_LIST = {
+                'power': {
+                    id: 0,
+                    name: outer_node._('event-state.state.power'),
+                    value: 'power',
+                },
+                'toggle': {
+                    id: 1,
+                    name: outer_node._('event-state.state.toggle'),
+                    value: 'toggle',
+                },
+                'brightness': {
+                    id: 2,
+                    name: outer_node._('event-state.state.brightness'),
+                    value: 'brightness',
+                },
+                'color-temperature': {
+                    id: 3,
+                    name: outer_node._('event-state.state.color_temperature'),
+                    value: 'color-temperature',
+                },
+                'color-rgb': {
+                    id: 4,
+                    name: outer_node._('event-state.state.color_rgb'),
+                    value: 'color-rgb',
+                },
+                'percentage': {
+                    id: 5,
+                    name: outer_node._('event-state.state.percentage'),
+                    value: 'percentage',
+                },
+                'motor-control': {
+                    id: 6,
+                    name: outer_node._('event-state.state.motor_control'),
+                    value: 'motor-control',
+                },
+                'motor-reverse': {
+                    id: 7,
+                    name: outer_node._('event-state.state.motor_reverse'),
+                    value: 'motor-reverse',
+                },
+                'motor-clb': {
+                    id: 9,
+                    name: outer_node._('event-state.state.motor_clb'),
+                    value: 'motor-clb',
+                },
+                'detect': {
+                    id: 10,
+                    name: outer_node._('event-state.state.detect'),
+                    value: 'detect',
+                },
+                'battery': {
+                    id: 11,
+                    name: outer_node._('event-state.state.battery'),
+                    value: 'battery',
+                },
+                'press': {
+                    id: 12,
+                    name: outer_node._('event-state.state.press'),
+                    value: 'press',
+                },
+                'rssi': {
+                    id: 13,
+                    name: outer_node._('event-state.state.rssi'),
+                    value: 'rssi',
+                },
+                'temperature':{
+                    id: 14,
+                    name: outer_node._('event-state.state.temperature'),
+                    value: 'temperature',
+                },
+                'humidity':{
+                    id: 15,
+                    name: outer_node._('event-state.state.humidity'),
+                    value: 'humidity',
+                },
+                'multi-press':{
+                    id: 16,
+                    name: outer_node._('event-state.state.multi_press'),
+                    value: 'multi-press',
+                },
+
+                'startup':{
+                    id:17,
+                    name:outer_node._('event-state.state.startup'),
+                    value:'startup'
+                },
+                'inching':{
+                    id:18,
+                    name:outer_node._('event-state.state.inching'),
+                    value:'inching'
+                },
+                'toggle-inching':{
+                    id:19,
+                    name:outer_node._('event-state.state.toggle_inching'),
+                    value:'toggle-inching'
+                },
+                'moisture':{
+                    id:20,
+                    name:outer_node._('event-state.state.moisture'),
+                    value:'moisture'
+                },
+                'barometric-pressure':{
+                    id:21,
+                    name:outer_node._('event-state.state.barometric_pressure'),
+                    value:'barometric-pressure'
+                },
+                'wind-direction':{
+                    id:22,
+                    name:outer_node._('event-state.state.wind_direction'),
+                    value:'wind-direction'
+                },
+                'rainfall':{
+                    id:23,
+                    name:outer_node._('event-state.state.rainfall'),
+                    value:'rainfall'
+                },
+                'illumination':{
+                    id:24,
+                    name:outer_node._('event-state.state.illumination'),
+                    value:'illumination'
+                },
+                'illumination-level':{
+                    id:25,
+                    name:outer_node._('event-state.state.illumination_level'),
+                    value:'illumination-level'
+                },
+                'ultraviolet-index':{
+                    id:26,
+                    name:outer_node._('event-state.state.ultraviolet_index'),
+                    value:'ultraviolet-index'
+                },
+                'co2':{
+                    id:27,
+                    name:outer_node._('event-state.state.co2'),
+                    value:'co2'
+                },
+                'power-consumption':{
+                    id:28,
+                    name:outer_node._('event-state.state.power_consumption'),
+                    value:'power-consumption'
+                },
+                'voltage':{
+                    id:29,
+                    name:outer_node._('event-state.state.voltage'),
+                    value:'voltage'
+                },
+                'electric-power':{
+                    id:30,
+                    name:outer_node._('event-state.state.electric_power'),
+                    value:'electric-power'
+                },
+                'electric-current':{
+                    id:31,
+                    name:outer_node._('event-state.state.electric_current'),
+                    value:'electric-current'
+                },
+                'mode':{
+                    id:32,
+                    name:outer_node._('event-state.state.mode'),
+                    value:'mode'
+                },
+                'thermostat-mode-detect':{
+                    id:33,
+                    name:outer_node._('event-state.state.thermostat_mode_detect'),
+                    value:'thermostat-mode-detect'
+                },
+                'identify':{
+                    id:34,
+                    name:outer_node._('event-state.state.identify'),
+                    value:'identify'
+                },
+                'tamper-alert':{
+                    id:35,
+                    name:outer_node._('event-state.state.tamper_alert'),
+                    value:'tamper-alert'
+                },
+                'detect-hold':{
+                    id:36,
+                    name:outer_node._('event-state.state.detect_hold'),
+                    value:'detect-hold'
+                },
+                'threshold-breaker':{
+                    id:37,
+                    name:outer_node._('event-state.state.threshold_breaker'),
+                    value:'threshold-breaker'
+                },
+                'fault':{
+                    id:38,
+                    name:outer_node._('event-state.state.fault'),
+                    value:'fault'
+                },
+                'lqi':{
+                    id:39,
+                    name:outer_node._('event-state.state.lqi'),
+                    value:'lqi'
+                },
+                'toggle-startup':{
+                    id:40,
+                    name:outer_node._('event-state.state.toggle_startup'),
+                    value:'toggle-startup'
+                },
+                'power-percentage':{
+                    id:41,
+                    name:outer_node._('event-state.state.power_percentage'),
+                    value:'power-percentage'
+                },
+                'eco':{
+                    id:42,
+                    name:outer_node._('event-state.state.eco'),
+                    value:'eco'
+                },
+                'anti-direct-blow':{
+                    id:43,
+                    name:outer_node._('event-state.state.anti_direct_blow'),
+                    value:'anti-direct-blow'
+                },
+                'horizontal-swing':{
+                    id:44,
+                    name:outer_node._('event-state.state.horizontal_swing'),
+                    value:'horizontal-swing'
+                },
+                'vertical-swing':{
+                    id:45,
+                    name:outer_node._('event-state.state.vertical_swing'),
+                    value:'vertical-swing'
+                },
+                'window-detection':{
+                    id:46,
+                    name:outer_node._('event-state.state.window_detection'),
+                    value:'window-detection'
+                },
+                'child-lock':{
+                    id:47,
+                    name:outer_node._('event-state.state.child_lock'),
+                    value:'child-lock'
+                },
+                'pm25':{
+                    id:48,
+                    name:outer_node._('event-state.state.pm25'),
+                    value:'pm25'
+                },
+                'voc-index':{
+                    id:49,
+                    name:outer_node._('event-state.state.voc_index'),
+                    value:'voc-index'
+                },
+                'gas':{
+                    id:50,
+                    name:outer_node._('event-state.state.gas'),
+                    value:'gas'
+                },
+                'smoke':{
+                    id:51,
+                    name:outer_node._('event-state.state.smoke'),
+                    value:'smoke'
+                },
+                'contact':{
+                    id:52,
+                    name:outer_node._('event-state.state.contact'),
+                    value:'contact'
+                },
+                'motion':{
+                    id:53,
+                    name:outer_node._('event-state.state.motion'),
+                    value:'motion'
+                },
+                'water-leak':{
+                    id:54,
+                    name:outer_node._('event-state.state.water_leak'),
+                    value:'water-leak'
+                },
+                'backlight-led':{
+                    id:55,
+                    name:outer_node._('event-state.state.backlight_led'),
+                    value:'backlight-led'
+                },
+                'light-mode': {
+                    id: 56,
+                    name: outer_node._('event-state.state.light_mode'),
+                    value: 'light-mode'
+                },
+                'network-led': {
+                    id: 57,
+                    name: outer_node._('event-state.state.network_led'),
+                    value: 'network-led'
+                },
+                'motor-mode': {
+                    id: 58,
+                    name: outer_node._('event-state.state.motor_mode'),
+                    value: 'motor-mode'
+                },
+                'transmit-power': {
+                    id: 59,
+                    name: outer_node._('event-state.state.transmit_power'),
+                    value: 'transmit-power'
+                },
+                'switch-mode': {
+                    id: 60,
+                    name: outer_node._('event-state.state.switch_mode'),
+                    value: 'switch-mode'
+                },
+                'external': {
+                    id: 61,
+                    name: outer_node._('event-state.state.external'),
+                    value: 'external'
+                },
+                'relay-separate': {
+                    id: 62,
+                    name: outer_node._('event-state.state.relay_separate'),
+                    value: 'relay-separate'
+                },
+
+                'air-quality': {
+                    id: 63,
+                    name: outer_node._('event-state.state.air_quality'),
+                    value: 'air-quality',
+                },
+                'co': {
+                    id: 64,
+                    name: outer_node._('event-state.state.co'),
+                    value: 'co',
+                },
+                'alarm': {
+                    id: 65,
+                    name: outer_node._('event-state.state.alarm'),
+                    value: 'alarm',
+                },
+                'volume': {
+                    id: 66,
+                    name: outer_node._('event-state.state.volume'),
+                    value: 'volume',
+                },
+                'smoke@numeric': {
+                    id: 68,
+                    name: outer_node._('event-state.state.smoke'),
+                    value: 'smoke@numeric',
+                },
+                'gas@numeric': {
+                    id: 69,
+                    name: outer_node._('event-state.state.gasNumeric'),
+                    value: 'gas@numeric',
+                },
+                'co@numeric': {
+                    id: 70,
+                    name: outer_node._('event-state.state.coNumeric'),
+                    value: 'co@numeric',
+                },
+                'volume@enum': {
+                    id: 71,
+                    name: outer_node._('event-state.state.volume'),
+                    value: 'volume@enum',
+                },
+                'air-quality@enum': {
+                    id: 72,
+                    name: outer_node._('event-state.state.air_quality'),
+                    value: 'air-quality@enum',
+                }
+            };
+
+            let abilityList = [];
+            let stateLength = 0;
+            for (const ele of tempList) {
+                if (ele.serial_number === $(DOM_ID_INPUT_DEVICE).val()) {
+                    abilityList.push(ele.state);
+                }
+            }
+            let template = '<option selected="selected" disabled="disabled" style="display:none" value="" label=""></option>' + (type === INIT_ITEM ? '<option value="all">All</option>' : '');
+            if (abilityList.length > 0) {
+                // filter special device
+                let stateList = stateFilter( Object.keys(abilityList[0]));
+                for (const item of stateList) {
+                    //The toggle capability needs to be split and processed separately
+                    if(STATE_LIST[item] && STATE_LIST[item].name && item !== 'toggle'){
+                        template += `<option value="${item}">${STATE_LIST[item].name}</option>`;
+                    }
+                }
+
+                const params = { stateList, outer_node, template, abilityList };
+                template = spacialDeviceAlias(params).template;
+                stateLength = template.split('</option>').length - 1 ;
+            }
+            return { template, stateLength };
+        }
+
+        function getBridgeName(node){
+            const server = $('#node-input-server').val();
+            let data = {
+                ip:server,
+            };
+            $.ajax({
+                type: 'POST',
+                url: 'ewelink-cube-api-v1/bridge',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(data),
+                success(res) {
+                    if (res.error === 0) {
+                        ihostName = res.data.name;
+                        $(DOM_ID_INPUT_DEVICE).children().each(function() {
+                            if($(this).text() === 'ihost'){
+                                $(this).text(ihostName);
+                            }
+                        });
+                    }
+                },
+                error(error) {},
+            });
+        }
+
+        /** Special Equipment Filtration Capabilities */
+        function stateFilter(stateList){
+            const device = tempList.find((item)=>item.serial_number === $(DOM_ID_INPUT_DEVICE).val());
+            if(device){
+                const capabilityList = Object.values((device.capabilities).map((item) => item.capability));
+                if(device.display_category === 'switch' && capabilityList.includes('humidity') && capabilityList.includes('temperature')){
+                    return stateList.filter((item) => item !== 'mode');
+                }
+            }
+            return stateList;
+        }
+
+        /** Special devices handle the ability of states, such as changing multi-channel devices from monitoring toggle capabilities to monitoring specific channels*/
+        function spacialDeviceAlias(params){
+            const device = tempList.find((item)=>item.serial_number === $(DOM_ID_INPUT_DEVICE).val());
+            if(device){
+                // 1、Fan light distinguishing light switch and gear position
+                if(device.display_category === 'fanLight'){
+                    if(params.stateList.includes('toggle')){
+                        const toggleValue = params.abilityList[0].toggle;
+                        const toggleNumber = Object.keys(toggleValue).length;
+                        for(let i = 0 ;i < toggleNumber ; i++){
+                            params.template += `<option value="toggle${i+1}">${i === 0 ? params.outer_node._('event-state.state.light') : params.outer_node._('event-state.state.fan')}</option>`;
+                        }
+                    }
+
+                    if(params.stateList.includes('mode')){
+                        params.template += `<option value="mode">${params.outer_node._('event-state.state.mode')}</option>`;
+                    }
+
+                    return params;
+                }
+
+                //2、Multichannel device splitting  ['switch','plug'].includes(device.display_category)
+                if( params.stateList.includes('toggle') && device.display_category !== 'thermostat'){
+                    const device = tempList.find((item) => item.serial_number === $(DOM_ID_INPUT_DEVICE).val());
+                    const togglecapabilities = device.capabilities.filter((item) => item.capability === 'toggle');
+
+                    for(let i = 0 ;i < togglecapabilities.length ; i++){
+                        params.template += `<option value="toggle${togglecapabilities[i].name}">${params.outer_node._('event-state.state.Channel') + ''+params.outer_node._(`event-state.state.${(i+1)}`) + params.outer_node._(`event-state.state.Status`)}</option>`;
+                    }
+                    return params;
+                }
+
+                // 3、trv device;
+                if(device.display_category === 'thermostat'){
+                    // 之所以要循环,因为能力在state中不一定存在，能力变化后才会出现在state中;
+                    for(const capabilityName of params.stateList){
+                        /** "thermostat"能力包含模式能力和状态能力 */
+                        if(capabilityName === "thermostat"){
+                            const thermostat = params.abilityList[0].thermostat;
+                            const thermostaCapalist = Object.keys(thermostat);
+                            thermostaCapalist.forEach((i)=>{
+                                params.template += `<option value="${i}">${params.outer_node._(`event-state.state.${i}`)}</option>`; // render mode and status;
+                            });
+                        }
+
+                        /** 温控阀的toggle能力特殊处理,通道1代表童锁,通道2代表开窗检测*/
+                        if(capabilityName === 'toggle'){
+                            const toggle = params.abilityList[0].toggle;
+                            const toggleCapalist = Object.keys(toggle);
+                            toggleCapalist.forEach((i)=>{
+                                params.template += `<option value="${i}">${params.outer_node._(`event-state.state.${i}`)}</option>`; // render child_lock and open_windows_detect
+                            });
+                        }
+
+                        /** 目标温度和霜降温度 三个模式对应三个目标温度,防霜冻温度就是防霜冻模式下的目标温度 */
+                        if(capabilityName === 'thermostat-target-setpoint'){
+                            const targetSetpoint = params.abilityList[0]['thermostat-target-setpoint'];
+                            const targetSetpointCapalist = Object.keys(targetSetpoint);
+                            targetSetpointCapalist.forEach((i)=>{
+                                params.template += `<option value="${i}">${params.outer_node._(`event-state.state.${i}`)}</option>`; // render target temp in different mode
+                            });
+                        }
+                        const batteryOption = `<option value="battery">${params.outer_node._(`event-state.state.battery`)}</option>`;
+                        const rssiOption = `<option value="rssi">${params.outer_node._(`event-state.state.rssi`)}</option>`;
+                        params.template = params.template.replace(batteryOption,'').replace(rssiOption,'');
+                    }
+                    // 温度能力在trv叫当前温度;
+                    params.template = params.template.replace('温度','当前温度');
+                    return params;
+                }
+
+                if(device.display_category === 'lightStrip'){
+                    if(params.abilityList[0].mode){
+                        params.template += `<option value="mode">${params.outer_node._(`event-state.lightStrip.mode`)}</option>`;
+                    }
+                }
+            }
+            return params;
+        }
+
+        RED.nodes.registerType('event-state', {
+            category: 'eWeLink Cube',
+            color: '#A4B9FC',
+            defaults: {
+                name: {
+                    value: '',
+                },
+                server: {
+                    value: '',
+                    required: true,
+                    type: 'api-server',
+                },
+                list: {
+                    value: '',
+                },
+                category: {
+                    value: '',
+                },
+                device: {
+                    value: '',
+                },
+                state: {
+                    value: '',
+                },
+            },
+            inputs: 0,
+            outputs: 1,
+            icon: 'bridge.svg',
+            label() {
+                return this.name || 'event-state';
+            },
+            oneditprepare() {
+                const node = this;
+                outer_node = node;
+                const server = $(DOM_ID_INPUT_SERVER).val();
+
+                $('#node-input-server').on('change', () => {
+                    if (server && server !== SERVER_EMPTY) {
+                        getDeviceList(node);
+                    }
+                });
+
+                $(DOM_ID_INPUT_DEVICE).on('focus', () => {
+                    getDeviceList(node);
+                });
+
+                $(DOM_ID_INPUT_DEVICE).on('change', () => {
+                    $('#state #main-area').eq(0).nextAll().remove();
+                    $(DOM_ID_INPUT_STATE).get(0).options.length = 0;
+                    const { template } = getStateOption(INIT_ITEM);
+                    $(DOM_ID_INPUT_STATE).append(template);
+
+                    $('#state').show();
+                    if ($(DOM_ID_INPUT_DEVICE).val() === 'all') {
+                        $('#state').hide();
+                        $(DOM_ID_INPUT_CATEGORY).val('');
+                    }else{
+                        const device = tempList.find((item)=>item.serial_number === $(DOM_ID_INPUT_DEVICE).val());
+                        device && $(DOM_ID_INPUT_CATEGORY).val(device.display_category);
+                    }
+                });
+
+                $(DOM_ID_INPUT_STATE).on('change', () => {
+                    if ($(DOM_ID_INPUT_STATE).val() === 'all') {
+                        $('#state #main-area').eq(0).nextAll().remove();
+                        $(DOM_ID_INPUT_SAVE_DATA).val('');
+                    }
+                });
+
+                $('#add-item-btn').on('click', addItem);
+
+                $(DOM_ID_INPUT_SERVER).on('change', () => {
+                    $(DOM_ID_INPUT_DEVICE).get(0).options.length = 0;
+                    $(DOM_ID_INPUT_DEVICE).val('');
+                    $(DOM_ID_INPUT_STATE).get(0).options.length = 0;
+                    $(DOM_ID_INPUT_STATE).val('');
+                    $('#state #main-area').eq(0).nextAll().remove();
+                });
+
+                // RED.events.on('deploy', () => { console.log('new flow deployed')});
+
+            },
+            oneditsave() {
+                saveAddtionState();
+            }
+        });
+    })();
+</script>
+
+<script type="text/html" data-template-name="event-state">
+    <div class="form-row">
+        <label for="node-input-name" data-i18n="event-state.label.name"></label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row" style="position:relative">
+        <span class="require">*</span>
+        <label for="node-input-server" data-i18n="event-state.label.server"></label>
+        <input type="text" id="node-input-server" placeholder="server" />
+    </div>
+    <!-- style="display:none" -->
+    <div class="form-row" style="display:none;width:0;height:0">
+        <label for="node-input-list"> List </label>
+        <input type="text" id="node-input-list" />
+    </div>
+    <div class="form-row" style="display:none;width:0;height:0">
+        <label for="node-input-category">category</label>
+        <input id="node-input-category" placeholder="category" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-device" data-i18n="event-state.label.device"></label>
+        <select id="node-input-device" placeholder="Device" style="width:70%"></select>
+    </div>
+    <div class="form-row" id="state">
+        <div id="main-area">
+            <label for="node-input-state" data-i18n="event-state.label.state" style="text-align:left"></label>
+            <div style="display: inline-block;">
+                <select placeholder="Select State" id="node-input-state" name="node-input-state" style="width:310px"></select>
+                <button class="add-item-btn" id="add-item-btn" style="background-color: #333BFF">+</button>
+            </div>
+        </div>
+    </div>
+</script>
+
+<style>
+    #main-area{
+        text-align: left;
+    }
+
+    .right-area {
+        display: inline-block;
+        margin-left: 104px;
+    }
+
+    .add-item-btn,
+    .del-item-btn {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        border-radius: 50%;
+        border: none;
+        color: white;
+        font-size: 20px;
+    }
+
+    .require {
+        position: absolute;
+        left: -8px;
+        top: 10px;
+        color: red;
+        font-size: 20px;
+    }
+</style>

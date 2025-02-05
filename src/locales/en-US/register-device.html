@@ -1,0 +1,52 @@
+<script type="text/markdown" data-help-name="register-device">
+"This example is only available for iHost V2.1.0 and above."
+Register a virtual device to iHost to control associated Node-RED devices.
+
+### Configuration
+
+* Name - Node name
+
+* Server - Server node
+
+* Device ID - ID of the registered device, consisting of letters and numbers.
+
+* Device - Device name
+
+* Type - Device type
+
+* Ability - Supported capabilities of the device
+
+* Manufacturer - Manufacturer of the device
+
+* Model - Registered device model
+
+* Firmware version - Firmware version of registered device
+
+* Server IP - Service IP of the associated Node-RED device
+
+* Additional Info - Custom info for the device
+
+* Device Initial State - Initial state of the registered device. [View docs](https://ewelink.cc/ewelink-cube/introduce-open-api/document/) for device capabilities and optional values.
+
+### Output
+
+Return device results and related information.
+
+Example:
+``` javascript
+{
+    "header":{
+        "name":"Response",
+        "message_id":"766234ac-a522-481f-8eb0-1057ec52fce9",
+        "version":"1"
+    },"payload":{
+        "endpoints":[
+            {
+                "serial_number":"6c29a488-42da-4375-a908-f724fca0e207",
+                "third_serial_number":"fef8f0a0-67d1-47e5-b871-9cece65e954b"
+            }
+        ]
+    }
+}
+```
+</script>
