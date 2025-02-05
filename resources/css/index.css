@@ -243,14 +243,15 @@
   position: relative;
   cursor: pointer;
   margin: 12px 0;
-  background: url("/resources/node-red-contrib-ewelink-cube/img/rgb-background.png") no-repeat;
+  background: url("/resources/node-red-contrib-ewelink-cube-fork/img/rgb-background.png")
+    no-repeat;
   border-radius: 15px;
 }
 .rgb-background-wrap .trigger-circle {
   position: absolute;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: url("/resources/node-red-contrib-ewelink-cube/img/trigger-circle.png");
+  background: url("/resources/node-red-contrib-ewelink-cube-fork/img/trigger-circle.png");
   background-position: center;
   background-size: 130%;
   pointer-events: none;
@@ -292,14 +293,16 @@
 .irrigation .irrigation-time .el-input__prefix {
   display: none;
 }
-.irrigation .el-input-number__decrease, .irrigation .el-input-number__increase {
+.irrigation .el-input-number__decrease,
+.irrigation .el-input-number__increase {
   display: none;
 }
 .irrigation .el-input__inner {
   text-align: left;
 }
 
-.el-input-number__decrease, .el-input-number__increase {
+.el-input-number__decrease,
+.el-input-number__increase {
   display: none;
 }
 
@@ -335,7 +338,12 @@
 .capability-selector .config-item .operation-area > .el-input.error input {
   border-color: #d6615f;
 }
-.capability-selector .config-item .operation-area .config-selector.error .el-input input {
+.capability-selector
+  .config-item
+  .operation-area
+  .config-selector.error
+  .el-input
+  input {
   border-color: #d6615f;
 }
 
@@ -364,4 +372,4 @@
 }
 .ihost-time-select .el-time-spinner.has-seconds .el-time-spinner__wrapper {
   width: 50% !important;
-}/*# sourceMappingURL=index.css.map */
+} /*# sourceMappingURL=index.css.map */

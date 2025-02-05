@@ -1,94 +1,94 @@
-
-.color-header{
+.color-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  .color-input {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-    .color-input{
-        display: flex;
-        justify-content: flex-start;
-        .title{
-            margin-right: 6px;
-            line-height: 22px;
-        }
-        .color-circle {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .el-input{
-            width: 60px;
-            margin-right: 10px;
-            margin-top: -7px;
-        }
-        .el-input__inner{
-            width: 50px;
-            height: 26px;
-        }
-        .rgb-input{
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 66px;
-            height: 26px;
-            margin-right: 20px;
-            .btn{
-                position: absolute;
-                right: -8px;
-                top: 0;
-                height: 26px;
-                width: 26px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                z-index: 2;
-                .up{
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 10px;
-                    width: 20px;
-                    font-size: 12px;
-                    background-color: #f5f7fa !important;
-                }
-                .down{
-                    display: flex;
-                    align-items: center;
-                    height: 10px;
-                    width: 20px;
-                    justify-content: center;
-                    font-size: 12px;
-                    background-color: #f5f7fa !important;
-                }
-            }
-        }
+    justify-content: flex-start;
+    .title {
+      margin-right: 6px;
+      line-height: 22px;
     }
+    .color-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .el-input {
+      width: 60px;
+      margin-right: 10px;
+      margin-top: -7px;
+    }
+    .el-input__inner {
+      width: 50px;
+      height: 26px;
+    }
+    .rgb-input {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 66px;
+      height: 26px;
+      margin-right: 20px;
+      .btn {
+        position: absolute;
+        right: -8px;
+        top: 0;
+        height: 26px;
+        width: 26px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        .up {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 10px;
+          width: 20px;
+          font-size: 12px;
+          background-color: #f5f7fa !important;
+        }
+        .down {
+          display: flex;
+          align-items: center;
+          height: 10px;
+          width: 20px;
+          justify-content: center;
+          font-size: 12px;
+          background-color: #f5f7fa !important;
+        }
+      }
+    }
+  }
 }
 
 .rgb-background-wrap {
-    width: 456px;
-    height: 120px;
-    position: relative;
-    cursor: pointer;
-    margin: 12px 0;
-    background: url('/resources/node-red-contrib-ewelink-cube/img/rgb-background.png') no-repeat;
-    border-radius: 15px;
-    .trigger-circle {
-        position: absolute;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        background: url('/resources/node-red-contrib-ewelink-cube/img/trigger-circle.png');
-        background-position: center;
-        background-size: 130%;
-        pointer-events: none;
-    }
+  width: 456px;
+  height: 120px;
+  position: relative;
+  cursor: pointer;
+  margin: 12px 0;
+  background: url("/resources/node-red-contrib-ewelink-cube-fork/img/rgb-background.png")
+    no-repeat;
+  border-radius: 15px;
+  .trigger-circle {
+    position: absolute;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: url("/resources/node-red-contrib-ewelink-cube-fork/img/trigger-circle.png");
+    background-position: center;
+    background-size: 130%;
+    pointer-events: none;
+  }
 }
 
 .disable {
-    pointer-events: none;
-    opacity: 0.3;
-    cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.3;
+  cursor: not-allowed;
 }

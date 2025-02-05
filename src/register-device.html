@@ -1,811 +1,888 @@
 <script type="module">
-import { CapabilitySelector } from '/resources/node-red-contrib-ewelink-cube/components/registerDevice/capabilitySelector.js';
+  import { CapabilitySelector } from "/resources/node-red-contrib-ewelink-cube-fork/components/registerDevice/capabilitySelector.js";
 
-const componentList = {
-    CapabilitySelector
-};
+  const componentList = {
+    CapabilitySelector,
+  };
 
-Object.entries(componentList).forEach(([name, component]) => {
+  Object.entries(componentList).forEach(([name, component]) => {
     Vue.component(name, component);
-});
+  });
 </script>
 
 <script type="text/html" data-template-name="register-device">
-    <div class="form-row">
-        <label for="node-input-name" data-i18n="register-device.label.name"></label>
-        <input type="text" id="node-input-name">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-server" data-i18n="register-device.label.server"></label>
-        <input type="text" id="node-input-server">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-device_id" data-i18n="register-device.label.device_id"></label>
-        <input type="text" id="node-input-device_id">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-device_name" data-i18n="register-device.label.device_name"></label>
-        <input type="text" id="node-input-device_name">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-category" data-i18n="register-device.label.category"></label>
-        <select name="node-input-category" id="node-input-category" style="width: 70%;"></select>
-    </div>
+  <div class="form-row">
+    <label for="node-input-name" data-i18n="register-device.label.name"></label>
+    <input type="text" id="node-input-name" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-server"
+      data-i18n="register-device.label.server"
+    ></label>
+    <input type="text" id="node-input-server" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-device_id"
+      data-i18n="register-device.label.device_id"
+    ></label>
+    <input type="text" id="node-input-device_id" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-device_name"
+      data-i18n="register-device.label.device_name"
+    ></label>
+    <input type="text" id="node-input-device_name" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-category"
+      data-i18n="register-device.label.category"
+    ></label>
+    <select
+      name="node-input-category"
+      id="node-input-category"
+      style="width: 70%;"
+    ></select>
+  </div>
 
-    <!-- V1 -->
-    <!-- <div class="form-row" style="display: flex;position:relative">
+  <!-- V1 -->
+  <!-- <div class="form-row" style="display: flex;position:relative">
         <span class="require">*</span>
         <label for="node-input-capabilities" style="padding: 6px 3px 0 0;" data-i18n="register-device.label.capabilities"></label>
         <div id="capa-list" style="display: inline-block; width: 70%;"></div>
     </div> -->
 
-    <input type="text" id="node-input-capabilities" style="width: 0; height: 0; display: none;">
-    <input type="text" id="node-input-capabilities_v2" style="width: 0; height: 0; display: none;">
+  <input
+    type="text"
+    id="node-input-capabilities"
+    style="width: 0; height: 0; display: none;"
+  />
+  <input
+    type="text"
+    id="node-input-capabilities_v2"
+    style="width: 0; height: 0; display: none;"
+  />
 
-    <!-- V2 -->
-    <div id="register-device-app"></div>
+  <!-- V2 -->
+  <div id="register-device-app"></div>
 
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-manufacturer" data-i18n="register-device.label.manufacturer"></label>
-        <input type="text" id="node-input-manufacturer">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-model" data-i18n="register-device.label.model"></label>
-        <input type="text" id="node-input-model">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-firmware_version" data-i18n="register-device.label.fw_version"></label>
-        <input type="text" id="node-input-firmware_version">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-service_address" data-i18n="register-device.label.service_ip"></label>
-        <input type="text" id="node-input-service_address" data-i18n="[placeholder]register-device.placeHolder.service_ip">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-tags" data-i18n="register-device.label.tags"></label>
-        <input type="text" id="node-input-tags" style="width: 70%;">
-    </div>
-    <div class="form-row" style="position:relative">
-        <span class="require">*</span>
-        <label for="node-input-state" data-i18n="register-device.label.state"></label>
-        <input type="text" id="node-input-state" style="width: 70%;">
-    </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-manufacturer"
+      data-i18n="register-device.label.manufacturer"
+    ></label>
+    <input type="text" id="node-input-manufacturer" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-model"
+      data-i18n="register-device.label.model"
+    ></label>
+    <input type="text" id="node-input-model" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-firmware_version"
+      data-i18n="register-device.label.fw_version"
+    ></label>
+    <input type="text" id="node-input-firmware_version" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-service_address"
+      data-i18n="register-device.label.service_ip"
+    ></label>
+    <input
+      type="text"
+      id="node-input-service_address"
+      data-i18n="[placeholder]register-device.placeHolder.service_ip"
+    />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label for="node-input-tags" data-i18n="register-device.label.tags"></label>
+    <input type="text" id="node-input-tags" style="width: 70%;" />
+  </div>
+  <div class="form-row" style="position:relative">
+    <span class="require">*</span>
+    <label
+      for="node-input-state"
+      data-i18n="register-device.label.state"
+    ></label>
+    <input type="text" id="node-input-state" style="width: 70%;" />
+  </div>
 </script>
 
 <script type="text/javascript">
-;(function () {
-    const DOM_ID_INPUT_CATEGORY = '#node-input-category';
-    const DOM_ID_INPUT_CAPABILITIES = '#node-input-capabilities';
-    const DOM_ID_INPUT_CAPABILITIES_V2 = '#node-input-capabilities_v2'
-    const DOM_ID_INPUT_TAGS = '#node-input-tags';
-    const DOM_ID_INPUT_STATE = '#node-input-state';
-    const DOM_ID_CAPA_LIST = '#capa-list';
-    const SERVER_EMPTY = '_ADD_';
-    const SERVER_DOM_NAME = '#node-input-server';
+  (function () {
+    const DOM_ID_INPUT_CATEGORY = "#node-input-category";
+    const DOM_ID_INPUT_CAPABILITIES = "#node-input-capabilities";
+    const DOM_ID_INPUT_CAPABILITIES_V2 = "#node-input-capabilities_v2";
+    const DOM_ID_INPUT_TAGS = "#node-input-tags";
+    const DOM_ID_INPUT_STATE = "#node-input-state";
+    const DOM_ID_CAPA_LIST = "#capa-list";
+    const SERVER_EMPTY = "_ADD_";
+    const SERVER_DOM_NAME = "#node-input-server";
 
-    const IHOST_VERSION_V1 = 'V1';
-    const IHOST_VERSION_V2 = 'V2';
+    const IHOST_VERSION_V1 = "V1";
+    const IHOST_VERSION_V2 = "V2";
     let IHOST_VERSION = IHOST_VERSION_V1;
 
     let globalVue = null;
 
-    RED.nodes.registerType('register-device', {
-        category: 'eWeLink Cube',
-        color: '#5F9AFD',
-        defaults: {
-            name: {
-                value: '',
-            },
-            server: {
-                value: '',
-                required: true,
-                type: 'api-server',
-            },
-            device_id: {
-                value: '',
-                required: true
-            },
-            device_name: {
-                value: '',
-                required: true
-            },
-            category: {
-                value: '',
-                required: true
-            },
-            capabilities: {
-                value: '',
-            },
-            manufacturer: {
-                value: '',
-                required: true
-            },
-            model: {
-                value: '',
-                required: true
-            },
-            firmware_version: {
-                value: '',
-                required: true
-            },
-            service_address: {
-                value: '',
-                required: true
-            },
-            tags: {
-                value: '{}',
-                required: true
-            },
-            state: {
-                value: '{}',
-                required: true
-            },
-            capabilities_v2: {
-                value: '',
-            }
+    RED.nodes.registerType("register-device", {
+      category: "eWeLink Cube",
+      color: "#5F9AFD",
+      defaults: {
+        name: {
+          value: "",
         },
-        inputs: 1,
-        outputs: 1,
-        icon: 'font-awesome/fa-registered',
-        label() {
-            return this.name || 'register-device';
+        server: {
+          value: "",
+          required: true,
+          type: "api-server",
         },
-        paletteLabel: 'register-device',
-        async oneditprepare() {
-            const server = $(SERVER_DOM_NAME).val();
-            if (server !== '_ADD_') {
-                $.ajax({
-                    type: 'POST',
-                    url: 'ewelink-cube-api-v1/get-device-list',
-                    contentType: 'application/json; charset=utf-8',
-                    data: JSON.stringify({ id: server }),
-                    success(res) {
-                        if (res.error !== 0) {
-                            RED.notify(`${node._('register-device.message.connect_fail')}`, { type: 'error' });
-                        }
-                    },
-                    error(error) {
-                        RED.notify(`${node._('register-device.message.connect_fail')}`, { type: 'error' });
-                    },
-                });
-            }
-            const node = this;
-            // Device category list
-            const CATE_LIST = [
-                {
-                    id: 0,
-                    name: node._('register-device.category.plug'),
-                    value: 'plug'
-                },
-                {
-                    id: 1,
-                    name: node._('register-device.category.switch'),
-                    value: 'switch'
-                },
-                {
-                    id: 2,
-                    name: node._('register-device.category.light'),
-                    value: 'light'
-                },
-                {
-                    id: 3,
-                    name: node._('register-device.category.curtain'),
-                    value: 'curtain'
-                },
-                {
-                    id: 18,
-                    name: node._('register-device.category.sensor'),
-                    value: 'sensor'
-                },
-                {
-                    id: 4,
-                    name: node._('register-device.category.contact_sensor'),
-                    value: 'contactSensor'
-                },
-                {
-                    id: 5,
-                    name: node._('register-device.category.motion_sensor'),
-                    value: 'motionSensor'
-                },
-                {
-                    id: 6,
-                    name: node._('register-device.category.temperature_sensor'),
-                    value: 'temperatureSensor'
-                },
-                {
-                    id: 7,
-                    name: node._('register-device.category.humidity_sensor'),
-                    value: 'humiditySensor'
-                },
-                {
-                    id: 8,
-                    name: node._('register-device.category.temperature_and_humidity_sensor'),
-                    value: 'temperatureAndHumiditySensor'
-                },
-                {
-                    id: 9,
-                    name: node._('register-device.category.water_leak_detector'),
-                    value: 'waterLeakDetector',
-                },
-                {
-                    id: 10,
-                    name: node._('register-device.category.smoke_detector'),
-                    value: 'smokeDetector',
-                },
-                {
-                    id: 11,
-                    name: node._('register-device.category.button'),
-                    value: 'button'
-                },
-                {
-                    id: 13,
-                    name: node._('register-device.category.fan_light'),
-                    value: 'fanLight',
-                },
-                {
-                    id: 14,
-                    name: node._('register-device.category.air_conditioner'),
-                    value: 'airConditioner'
-                },
-                {
-                    id: 15,
-                    name: node._('register-device.category.fan'),
-                    value: 'fan'
-                },
-                {
-                    id: 17,
-                    name: node._('register-device.category.light_strip'),
-                    value: 'lightStrip'
-                },
-            ];
-            // Device capability list
-            const CAPA_LIST = [
-                {
-                    id: 0,
-                    name: node._('register-device.capability.power'),
-                    value: 'power',
-                    prioriy: 2
-                },
-                {
-                    id: 4,
-                    name: node._('register-device.capability.toggle'),
-                    value: 'toggle',
-                    prioriy: 3
-                },
-                {
-                    id: 14,
-                    name: node._('register-device.capability.brightness'),
-                    value: 'brightness',
-                    prioriy: 4
-                },
-                {
-                    id: 13,
-                    name: node._('register-device.capability.color_temperature'),
-                    value: 'color-temperature',
-                    prioriy: 5
-                },
-                {
-                    id: 12,
-                    name: node._('register-device.capability.color_rgb'),
-                    value: 'color-rgb',
-                    prioriy: 6
-                },
-                {
-                    id: 5,
-                    name: node._('register-device.capability.percentage'),
-                    value: 'percentage',
-                    prioriy: 7
-                },
-                {
-                    id: 6,
-                    name: node._('register-device.capability.motor_control'),
-                    value: 'motor-control',
-                    prioriy: 8
-                },
-                {
-                    id: 7,
-                    name: node._('register-device.capability.motor_reverse'),
-                    value: 'motor-reverse',
-                    prioriy: 90
-                },
-                {
-                    id: 8,
-                    name: node._('register-device.capability.motor_clb'),
-                    value: 'motor-clb',
-                    prioriy: 5
-                },
-                {
-                    id: 2,
-                    name: node._('register-device.capability.detect'),
-                    value: 'detect',
-                    prioriy: 25
-                },
-                {
-                    id: 3,
-                    name: node._('register-device.capability.battery'),
-                    value: 'battery',
-                    prioriy: 1
-                },
-                {
-                    id: 11,
-                    name: node._('register-device.capability.press'),
-                    value: 'press',
-                    prioriy: 26
-                },
-                {
-                    id: 1,
-                    name: node._('register-device.capability.rssi'),
-                    value: 'rssi',
-                    prioriy: 2
-                },
-                {
-                    id: 10,
-                    name: node._('register-device.capability.humidity'),
-                    value: 'humidity',
-                    prioriy: 10
-                },
-                {
-                    id: 9,
-                    name: node._('register-device.capability.temperature'),
-                    value: 'temperature',
-                    prioriy: 9
-                },
-
-            ];
-            const CAPA_LIST_V1 = [];
-            const CAPA_LIST_V2 = [
-                {
-                    id: 16,
-                    name: node._('register-device.capability.startup'),
-                    value: 'startup',
-                    prioriy: 2
-                },
-                {
-                    id: 17,
-                    name: node._('register-device.capability.inching'),
-                    value: 'inching',
-                    prioriy: 3
-                },
-                {
-                    id: 18,
-                    name: node._('register-device.capability.toggle_inching'),
-                    value: 'toggle-inching',
-                    prioriy: 3
-                },
-                {
-                    id: 20,
-                    name: node._('register-device.capability.moisture'),
-                    value: 'moisture',
-                    prioriy: 34
-                },
-                {
-                    id: 21,
-                    name: node._('register-device.capability.barometric_pressure'),
-                    value: 'barometric-pressure',
-                    prioriy: 35
-                },
-                {
-                    id: 22,
-                    name: node._('register-device.capability.wind_speed'),
-                    value: 'wind-speed',
-                    prioriy: 36
-                },
-                {
-                    id: 23,
-                    name: node._('register-device.capability.wind_direction'),
-                    value: 'wind-direction',
-                    prioriy: 37
-                },
-                {
-                    id: 24,
-                    name: node._('register-device.capability.rainfall'),
-                    value: 'rainfall',
-                    prioriy: 38
-                },
-                {
-                    id: 25,
-                    name: node._('register-device.capability.illumination'),
-                    value: 'illumination',
-                    prioriy: 29
-                },
-                {
-                    id: 26,
-                    name: node._('register-device.capability.illumination_level'),
-                    value: 'illumination-level',
-                    prioriy: void 0
-                },
-                {
-                    id: 27,
-                    name: node._('register-device.capability.ultraviolet_index'),
-                    value: 'ultraviolet-index',
-                    prioriy: 39
-                },
-                {
-                    id: 28,
-                    name: node._('register-device.capability.co2'),
-                    value: 'co2',
-                    prioriy: 28
-                },
-                {
-                    id: 29,
-                    name: node._('register-device.capability.electrical_conductivity'),
-                    value: 'electrical-conductivity',
-                    prioriy: 40
-                },
-                {
-                    id: 31,
-                    name: node._('register-device.capability.power_consumption'),
-                    value: 'power-consumption',
-                    prioriy: 16
-                },
-                {
-                    id: 32,
-                    name: node._('register-device.capability.voltage'),
-                    value: 'voltage',
-                    prioriy: 17
-                },
-                {
-                    id: 33,
-                    name: node._('register-device.capability.electric_power'),
-                    value: 'electric-power',
-                    prioriy: 19
-                },
-                {
-                    id: 34,
-                    name: node._('register-device.capability.electric_current'),
-                    value: 'electric-current',
-                    prioriy: 18
-                },
-                {
-                    id: 35,
-                    name: node._('register-device.capability.multi_press'),
-                    value: 'multi-press',
-                    prioriy: 27
-                },
-                {
-                    id: 36,
-                    name: node._('register-device.capability.mode'),
-                    value: 'mode',
-                    prioriy: 15
-                },
-                {
-                    id: 37,
-                    name: node._('register-device.capability.thermostat_mode_detect'),
-                    value: 'thermostat-mode-detect',
-                    prioriy: 24
-                },
-                {
-                    id: 38,
-                    name: node._('register-device.capability.identify'),
-                    value: 'identify',
-                    prioriy: void 0
-                },
-                {
-                    id: 41,
-                    name: node._('register-device.capability.tamper_alert'),
-                    value: 'tamper-alert',
-                    prioriy: 26
-                },
-                {
-                    id: 42,
-                    name: node._('register-device.capability.detect_hold'),
-                    value: 'detect-hold',
-                    prioriy: void 0
-                },
-                {
-                    id: 43,
-                    name: node._('register-device.capability.threshold_breaker'),
-                    value: 'threshold-breaker',
-                    prioriy: 13
-                },
-                {
-                    id: 55,
-                    name: node._('register-device.capability.fault'),
-                    value: 'fault',
-                    prioriy: 0
-                },
-                {
-                    id: 63,
-                    name: node._('register-device.capability.lqi'),
-                    value: 'lqi',
-                    prioriy: 3
-                },
-                {
-                    id: 64,
-                    name: node._('register-device.capability.toggle_startup'),
-                    value: 'toggle-startup',
-                    prioriy: 2
-                },
-                {
-                    id: 66,
-                    name: node._('register-device.capability.power_percentage'),
-                    value: 'power-percentage',
-                    prioriy: 16
-                },
-                {
-                    id: 49,
-                    name: node._('register-device.capability.eco'),
-                    value: 'eco',
-                    prioriy: 50
-                },
-                {
-                    id: 50,
-                    name: node._('register-device.capability.anti_direct_blow'),
-                    value: 'anti-direct-blow',
-                    prioriy: 47
-                },
-                {
-                    id: 51,
-                    name: node._('register-device.capability.horizontal_swing'),
-                    value: 'horizontal-swing',
-                    prioriy: 48
-                },
-                {
-                    id: 52,
-                    name: node._('register-device.capability.vertical_swing'),
-                    value: 'vertical-swing',
-                    prioriy: 49
-                },
-                {
-                    id: 53,
-                    name: node._('register-device.capability.window_detection'),
-                    value: 'window-detection',
-                    prioriy: 14
-                },
-                {
-                    id: 54,
-                    name: node._('register-device.capability.child_lock'),
-                    value: 'child-lock',
-                    prioriy: 15
-                },
-                {
-                    id: 56,
-                    name: node._('register-device.capability.pm25'),
-                    value: 'pm25',
-                    prioriy: 41
-                },
-                {
-                    id: 57,
-                    name: node._('register-device.capability.voc_index'),
-                    value: 'voc-index',
-                    prioriy: 42
-                },
-                {
-                    id: 58,
-                    name: node._('register-device.capability.gas'),
-                    value: 'gas',
-                    prioriy: 46
-                },
-                {
-                    id: 59,
-                    name: node._('register-device.capability.smoke'),
-                    value: 'smoke',
-                    prioriy: 30
-                },
-                {
-                    id: 60,
-                    name: node._('register-device.capability.contact'),
-                    value: 'contact',
-                    prioriy: 31
-                },
-                {
-                    id: 61,
-                    name: node._('register-device.capability.motion'),
-                    value: 'motion',
-                    prioriy: 32
-                },
-                {
-                    id: 62,
-                    name: node._('register-device.capability.water_leak'),
-                    value: 'water-leak',
-                    prioriy: 33
-                },
-                {
-                    id: 63,
-                    name: node._('register-device.capability.backlight_led'),
-                    value: 'backlight-led',
-                    prioriy: 90
-                },
-                {
-                    id: 64,
-                    name: node._('register-device.capability.light_mode'),
-                    value: 'light-mode',
-                    prioriy: 6.1
-                },
-                {
-                    id: 65,
-                    name: node._('register-device.capability.network_led'),
-                    value: 'network-led',
-                    prioriy: 89
-                },
-                {
-                    id: 66,
-                    name: node._('register-device.capability.motor_mode'),
-                    value: 'motor-mode',
-                    prioriy: 8
-                },
-                {
-                    id: 67,
-                    name: node._('register-device.capability.transmit_power'),
-                    value: 'transmit-power',
-                    prioriy: 6
-                },
-                {
-                    id: 68,
-                    name: node._('register-device.capability.switch_mode'),
-                    value: 'switch-mode',
-                    prioriy: 4
-                },
-                {
-                    id: 68,
-                    name: node._('register-device.capability.external'),
-                    value: 'external',
-                    prioriy: 3.1
-                },
-                {
-                    id: 69,
-                    name: node._('register-device.capability.relay_separate'),
-                    value: 'relay-separate',
-                    prioriy: 5
-                },
-                {
-                    id: 70,
-                    name: node._('register-device.capability.air_quality'),
-                    value: 'air-quality',
-                    prioriy: 51.1
-                },
-                {
-                    id: 71,
-                    name: node._('register-device.capability.co'),
-                    value: 'co',
-                    prioriy: 43
-                },
-                {
-                    id: 72,
-                    name: node._('register-device.capability.alarm'),
-                    value: 'alarm',
-                    prioriy: 47
-                },
-                {
-                    id: 73,
-                    name: node._('register-device.capability.volume'),
-                    value: 'volume',
-                    prioriy: 48.1
-                },
-                {
-                    id: 75,
-                    name: node._('register-device.capability.smokeNumeric'),
-                    value: 'smoke@numeric',
-                    prioriy: 30.1
-                },
-                {
-                    id: 76,
-                    name: node._('register-device.capability.gasNumeric'),
-                    value: 'gas@numeric',
-                    prioriy: 46.1
-                },
-                {
-                    id: 77,
-                    name: node._('register-device.capability.coNumeric'),
-                    value: 'co@numeric',
-                    prioriy: 43.1
-                },
-                {
-                    id: 78,
-                    name: node._('register-device.capability.volume'),
-                    value: 'volume@enum',
-                    prioriy: 48
-                },
-                {
-                    id: 79,
-                    name: node._('register-device.capability.air_quality'),
-                    value: 'air-quality@enum',
-                    prioriy: 51
-                }
-            ];
-            const TOGGLE_SELECT_HTML_STR = `<br><span style="padding-right: 8px; vertical-align: middle; display: inline-block; margin-top: 6px;">${node._('register-device.label.toggle_num')}</span><select id="capa-toggle-select" style="margin-top: 8px;"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>`;
-            const ADD_ITEM_BTN_HTML_STR = '<span class="add-item-btn">+</span>';
-            const DEL_ITEM_BTN_HTML_STR = '<span class="del-item-btn">-</span>';
-            // category 选择框打开后根据 IHOST_VERSION 渲染选项
-            const renderCategoryOptions = () => {
-                const categorySelect = $(DOM_ID_INPUT_CATEGORY);
-                const optionsArray = CATE_LIST;
-                categorySelect.empty();
-                optionsArray.forEach(item => {
-                    categorySelect.append(`<option value="${item.value}">${item.name}</option>`);
-                });
-                categorySelect.val(node.category);
-            };
-
-            $(DOM_ID_INPUT_TAGS).typedInput({
-                type: 'json',
-                types: ['json']
-            });
-
-            $(DOM_ID_INPUT_STATE).typedInput({
-                type: 'json',
-                types: ['json']
-            });
-
-            renderCategoryOptions();
-            if (node.category) {
-                $(DOM_ID_INPUT_CATEGORY).val(node.category);
-            }
-
-            globalVue && globalVue.$destroy();
-            globalVue = await createActionByVue({
-                nodeRed: node,
-                capabilityList: CAPA_LIST,
-                capabilityListV1: CAPA_LIST_V1,
-                capabilityListV2: CAPA_LIST_V2
-            });
-            $(SERVER_DOM_NAME).on('change', async () => {
-                const server = $(SERVER_DOM_NAME).val();
-                if (server !== SERVER_EMPTY) {
-                    const bridgeInfo = await getBridgeInfo({ nodeRed: node });
-                    if (bridgeInfo?.data?.fw_version) {
-                        const { fw_version } = bridgeInfo.data;
-                        // 开放接口升级成V2是在版本：2.1.0
-                        IHOST_VERSION = compareVersion(fw_version, '2.1.0') >= 0 ? IHOST_VERSION_V2 : IHOST_VERSION_V1;
-                        globalVue?.setIHostVersion(IHOST_VERSION);
-                    }
-                } else {
-                    IHOST_VERSION = IHOST_VERSION_V1;
-                    globalVue?.setIHostVersion(IHOST_VERSION);
-                }
-                globalVue?.initCapabilityEditData();
-            });
+        device_id: {
+          value: "",
+          required: true,
         },
-        oneditsave() {
-            let editData = globalVue.getCapabilitiesData();
-            let saveData = [];
-            editData.forEach(item => {
-                if (IHOST_VERSION === IHOST_VERSION_V1) {
-                    delete item.settings;
-                    // ihost 处于 V1, 给能力一个默认的权限
-                    item.permission = getDefaultCapabilityPermission(item.capability);
-                } else {
-                    if (!item.settings || item.settings === '{}') delete item.settings;
-                }
-                const { capability, toggleNum, permission, settings, name } = item;
-                if (['toggle', 'multi-press'].includes(capability)) {
-                    saveData.push(...Array.from({ length: toggleNum }, (_, i) => ({ capability, permission, name: `${i+1}` })));
-                } else if ('toggle-startup' === capability) {
-                    const toggleStartupNum = editData.find(item => item.capability === 'toggle')?.toggleNum ?? 1;
-                    saveData.push(...Array.from({ length: toggleStartupNum }, (_, i) => ({ capability, permission, name: `${i+1}` })));
-                } else {
-                    const saveDataItem = { capability, permission };
-                    if (settings) saveDataItem.settings = settings;
-                    if (name) saveDataItem.name = name;
-                    saveData.push(saveDataItem);
-                }
-            });
-            $(DOM_ID_INPUT_CAPABILITIES_V2).val(JSON.stringify(saveData));
-            $(DOM_ID_INPUT_CAPABILITIES).val('null');
+        device_name: {
+          value: "",
+          required: true,
+        },
+        category: {
+          value: "",
+          required: true,
+        },
+        capabilities: {
+          value: "",
+        },
+        manufacturer: {
+          value: "",
+          required: true,
+        },
+        model: {
+          value: "",
+          required: true,
+        },
+        firmware_version: {
+          value: "",
+          required: true,
+        },
+        service_address: {
+          value: "",
+          required: true,
+        },
+        tags: {
+          value: "{}",
+          required: true,
+        },
+        state: {
+          value: "{}",
+          required: true,
+        },
+        capabilities_v2: {
+          value: "",
+        },
+      },
+      inputs: 1,
+      outputs: 1,
+      icon: "font-awesome/fa-registered",
+      label() {
+        return this.name || "register-device";
+      },
+      paletteLabel: "register-device",
+      async oneditprepare() {
+        const server = $(SERVER_DOM_NAME).val();
+        if (server !== "_ADD_") {
+          $.ajax({
+            type: "POST",
+            url: "ewelink-cube-api-v1/get-device-list",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ id: server }),
+            success(res) {
+              if (res.error !== 0) {
+                RED.notify(
+                  `${node._("register-device.message.connect_fail")}`,
+                  { type: "error" }
+                );
+              }
+            },
+            error(error) {
+              RED.notify(`${node._("register-device.message.connect_fail")}`, {
+                type: "error",
+              });
+            },
+          });
         }
+        const node = this;
+        // Device category list
+        const CATE_LIST = [
+          {
+            id: 0,
+            name: node._("register-device.category.plug"),
+            value: "plug",
+          },
+          {
+            id: 1,
+            name: node._("register-device.category.switch"),
+            value: "switch",
+          },
+          {
+            id: 2,
+            name: node._("register-device.category.light"),
+            value: "light",
+          },
+          {
+            id: 3,
+            name: node._("register-device.category.curtain"),
+            value: "curtain",
+          },
+          {
+            id: 18,
+            name: node._("register-device.category.sensor"),
+            value: "sensor",
+          },
+          {
+            id: 4,
+            name: node._("register-device.category.contact_sensor"),
+            value: "contactSensor",
+          },
+          {
+            id: 5,
+            name: node._("register-device.category.motion_sensor"),
+            value: "motionSensor",
+          },
+          {
+            id: 6,
+            name: node._("register-device.category.temperature_sensor"),
+            value: "temperatureSensor",
+          },
+          {
+            id: 7,
+            name: node._("register-device.category.humidity_sensor"),
+            value: "humiditySensor",
+          },
+          {
+            id: 8,
+            name: node._(
+              "register-device.category.temperature_and_humidity_sensor"
+            ),
+            value: "temperatureAndHumiditySensor",
+          },
+          {
+            id: 9,
+            name: node._("register-device.category.water_leak_detector"),
+            value: "waterLeakDetector",
+          },
+          {
+            id: 10,
+            name: node._("register-device.category.smoke_detector"),
+            value: "smokeDetector",
+          },
+          {
+            id: 11,
+            name: node._("register-device.category.button"),
+            value: "button",
+          },
+          {
+            id: 13,
+            name: node._("register-device.category.fan_light"),
+            value: "fanLight",
+          },
+          {
+            id: 14,
+            name: node._("register-device.category.air_conditioner"),
+            value: "airConditioner",
+          },
+          {
+            id: 15,
+            name: node._("register-device.category.fan"),
+            value: "fan",
+          },
+          {
+            id: 17,
+            name: node._("register-device.category.light_strip"),
+            value: "lightStrip",
+          },
+        ];
+        // Device capability list
+        const CAPA_LIST = [
+          {
+            id: 0,
+            name: node._("register-device.capability.power"),
+            value: "power",
+            prioriy: 2,
+          },
+          {
+            id: 4,
+            name: node._("register-device.capability.toggle"),
+            value: "toggle",
+            prioriy: 3,
+          },
+          {
+            id: 14,
+            name: node._("register-device.capability.brightness"),
+            value: "brightness",
+            prioriy: 4,
+          },
+          {
+            id: 13,
+            name: node._("register-device.capability.color_temperature"),
+            value: "color-temperature",
+            prioriy: 5,
+          },
+          {
+            id: 12,
+            name: node._("register-device.capability.color_rgb"),
+            value: "color-rgb",
+            prioriy: 6,
+          },
+          {
+            id: 5,
+            name: node._("register-device.capability.percentage"),
+            value: "percentage",
+            prioriy: 7,
+          },
+          {
+            id: 6,
+            name: node._("register-device.capability.motor_control"),
+            value: "motor-control",
+            prioriy: 8,
+          },
+          {
+            id: 7,
+            name: node._("register-device.capability.motor_reverse"),
+            value: "motor-reverse",
+            prioriy: 90,
+          },
+          {
+            id: 8,
+            name: node._("register-device.capability.motor_clb"),
+            value: "motor-clb",
+            prioriy: 5,
+          },
+          {
+            id: 2,
+            name: node._("register-device.capability.detect"),
+            value: "detect",
+            prioriy: 25,
+          },
+          {
+            id: 3,
+            name: node._("register-device.capability.battery"),
+            value: "battery",
+            prioriy: 1,
+          },
+          {
+            id: 11,
+            name: node._("register-device.capability.press"),
+            value: "press",
+            prioriy: 26,
+          },
+          {
+            id: 1,
+            name: node._("register-device.capability.rssi"),
+            value: "rssi",
+            prioriy: 2,
+          },
+          {
+            id: 10,
+            name: node._("register-device.capability.humidity"),
+            value: "humidity",
+            prioriy: 10,
+          },
+          {
+            id: 9,
+            name: node._("register-device.capability.temperature"),
+            value: "temperature",
+            prioriy: 9,
+          },
+        ];
+        const CAPA_LIST_V1 = [];
+        const CAPA_LIST_V2 = [
+          {
+            id: 16,
+            name: node._("register-device.capability.startup"),
+            value: "startup",
+            prioriy: 2,
+          },
+          {
+            id: 17,
+            name: node._("register-device.capability.inching"),
+            value: "inching",
+            prioriy: 3,
+          },
+          {
+            id: 18,
+            name: node._("register-device.capability.toggle_inching"),
+            value: "toggle-inching",
+            prioriy: 3,
+          },
+          {
+            id: 20,
+            name: node._("register-device.capability.moisture"),
+            value: "moisture",
+            prioriy: 34,
+          },
+          {
+            id: 21,
+            name: node._("register-device.capability.barometric_pressure"),
+            value: "barometric-pressure",
+            prioriy: 35,
+          },
+          {
+            id: 22,
+            name: node._("register-device.capability.wind_speed"),
+            value: "wind-speed",
+            prioriy: 36,
+          },
+          {
+            id: 23,
+            name: node._("register-device.capability.wind_direction"),
+            value: "wind-direction",
+            prioriy: 37,
+          },
+          {
+            id: 24,
+            name: node._("register-device.capability.rainfall"),
+            value: "rainfall",
+            prioriy: 38,
+          },
+          {
+            id: 25,
+            name: node._("register-device.capability.illumination"),
+            value: "illumination",
+            prioriy: 29,
+          },
+          {
+            id: 26,
+            name: node._("register-device.capability.illumination_level"),
+            value: "illumination-level",
+            prioriy: void 0,
+          },
+          {
+            id: 27,
+            name: node._("register-device.capability.ultraviolet_index"),
+            value: "ultraviolet-index",
+            prioriy: 39,
+          },
+          {
+            id: 28,
+            name: node._("register-device.capability.co2"),
+            value: "co2",
+            prioriy: 28,
+          },
+          {
+            id: 29,
+            name: node._("register-device.capability.electrical_conductivity"),
+            value: "electrical-conductivity",
+            prioriy: 40,
+          },
+          {
+            id: 31,
+            name: node._("register-device.capability.power_consumption"),
+            value: "power-consumption",
+            prioriy: 16,
+          },
+          {
+            id: 32,
+            name: node._("register-device.capability.voltage"),
+            value: "voltage",
+            prioriy: 17,
+          },
+          {
+            id: 33,
+            name: node._("register-device.capability.electric_power"),
+            value: "electric-power",
+            prioriy: 19,
+          },
+          {
+            id: 34,
+            name: node._("register-device.capability.electric_current"),
+            value: "electric-current",
+            prioriy: 18,
+          },
+          {
+            id: 35,
+            name: node._("register-device.capability.multi_press"),
+            value: "multi-press",
+            prioriy: 27,
+          },
+          {
+            id: 36,
+            name: node._("register-device.capability.mode"),
+            value: "mode",
+            prioriy: 15,
+          },
+          {
+            id: 37,
+            name: node._("register-device.capability.thermostat_mode_detect"),
+            value: "thermostat-mode-detect",
+            prioriy: 24,
+          },
+          {
+            id: 38,
+            name: node._("register-device.capability.identify"),
+            value: "identify",
+            prioriy: void 0,
+          },
+          {
+            id: 41,
+            name: node._("register-device.capability.tamper_alert"),
+            value: "tamper-alert",
+            prioriy: 26,
+          },
+          {
+            id: 42,
+            name: node._("register-device.capability.detect_hold"),
+            value: "detect-hold",
+            prioriy: void 0,
+          },
+          {
+            id: 43,
+            name: node._("register-device.capability.threshold_breaker"),
+            value: "threshold-breaker",
+            prioriy: 13,
+          },
+          {
+            id: 55,
+            name: node._("register-device.capability.fault"),
+            value: "fault",
+            prioriy: 0,
+          },
+          {
+            id: 63,
+            name: node._("register-device.capability.lqi"),
+            value: "lqi",
+            prioriy: 3,
+          },
+          {
+            id: 64,
+            name: node._("register-device.capability.toggle_startup"),
+            value: "toggle-startup",
+            prioriy: 2,
+          },
+          {
+            id: 66,
+            name: node._("register-device.capability.power_percentage"),
+            value: "power-percentage",
+            prioriy: 16,
+          },
+          {
+            id: 49,
+            name: node._("register-device.capability.eco"),
+            value: "eco",
+            prioriy: 50,
+          },
+          {
+            id: 50,
+            name: node._("register-device.capability.anti_direct_blow"),
+            value: "anti-direct-blow",
+            prioriy: 47,
+          },
+          {
+            id: 51,
+            name: node._("register-device.capability.horizontal_swing"),
+            value: "horizontal-swing",
+            prioriy: 48,
+          },
+          {
+            id: 52,
+            name: node._("register-device.capability.vertical_swing"),
+            value: "vertical-swing",
+            prioriy: 49,
+          },
+          {
+            id: 53,
+            name: node._("register-device.capability.window_detection"),
+            value: "window-detection",
+            prioriy: 14,
+          },
+          {
+            id: 54,
+            name: node._("register-device.capability.child_lock"),
+            value: "child-lock",
+            prioriy: 15,
+          },
+          {
+            id: 56,
+            name: node._("register-device.capability.pm25"),
+            value: "pm25",
+            prioriy: 41,
+          },
+          {
+            id: 57,
+            name: node._("register-device.capability.voc_index"),
+            value: "voc-index",
+            prioriy: 42,
+          },
+          {
+            id: 58,
+            name: node._("register-device.capability.gas"),
+            value: "gas",
+            prioriy: 46,
+          },
+          {
+            id: 59,
+            name: node._("register-device.capability.smoke"),
+            value: "smoke",
+            prioriy: 30,
+          },
+          {
+            id: 60,
+            name: node._("register-device.capability.contact"),
+            value: "contact",
+            prioriy: 31,
+          },
+          {
+            id: 61,
+            name: node._("register-device.capability.motion"),
+            value: "motion",
+            prioriy: 32,
+          },
+          {
+            id: 62,
+            name: node._("register-device.capability.water_leak"),
+            value: "water-leak",
+            prioriy: 33,
+          },
+          {
+            id: 63,
+            name: node._("register-device.capability.backlight_led"),
+            value: "backlight-led",
+            prioriy: 90,
+          },
+          {
+            id: 64,
+            name: node._("register-device.capability.light_mode"),
+            value: "light-mode",
+            prioriy: 6.1,
+          },
+          {
+            id: 65,
+            name: node._("register-device.capability.network_led"),
+            value: "network-led",
+            prioriy: 89,
+          },
+          {
+            id: 66,
+            name: node._("register-device.capability.motor_mode"),
+            value: "motor-mode",
+            prioriy: 8,
+          },
+          {
+            id: 67,
+            name: node._("register-device.capability.transmit_power"),
+            value: "transmit-power",
+            prioriy: 6,
+          },
+          {
+            id: 68,
+            name: node._("register-device.capability.switch_mode"),
+            value: "switch-mode",
+            prioriy: 4,
+          },
+          {
+            id: 68,
+            name: node._("register-device.capability.external"),
+            value: "external",
+            prioriy: 3.1,
+          },
+          {
+            id: 69,
+            name: node._("register-device.capability.relay_separate"),
+            value: "relay-separate",
+            prioriy: 5,
+          },
+          {
+            id: 70,
+            name: node._("register-device.capability.air_quality"),
+            value: "air-quality",
+            prioriy: 51.1,
+          },
+          {
+            id: 71,
+            name: node._("register-device.capability.co"),
+            value: "co",
+            prioriy: 43,
+          },
+          {
+            id: 72,
+            name: node._("register-device.capability.alarm"),
+            value: "alarm",
+            prioriy: 47,
+          },
+          {
+            id: 73,
+            name: node._("register-device.capability.volume"),
+            value: "volume",
+            prioriy: 48.1,
+          },
+          {
+            id: 75,
+            name: node._("register-device.capability.smokeNumeric"),
+            value: "smoke@numeric",
+            prioriy: 30.1,
+          },
+          {
+            id: 76,
+            name: node._("register-device.capability.gasNumeric"),
+            value: "gas@numeric",
+            prioriy: 46.1,
+          },
+          {
+            id: 77,
+            name: node._("register-device.capability.coNumeric"),
+            value: "co@numeric",
+            prioriy: 43.1,
+          },
+          {
+            id: 78,
+            name: node._("register-device.capability.volume"),
+            value: "volume@enum",
+            prioriy: 48,
+          },
+          {
+            id: 79,
+            name: node._("register-device.capability.air_quality"),
+            value: "air-quality@enum",
+            prioriy: 51,
+          },
+        ];
+        const TOGGLE_SELECT_HTML_STR = `<br><span style="padding-right: 8px; vertical-align: middle; display: inline-block; margin-top: 6px;">${node._(
+          "register-device.label.toggle_num"
+        )}</span><select id="capa-toggle-select" style="margin-top: 8px;"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>`;
+        const ADD_ITEM_BTN_HTML_STR = '<span class="add-item-btn">+</span>';
+        const DEL_ITEM_BTN_HTML_STR = '<span class="del-item-btn">-</span>';
+        // category 选择框打开后根据 IHOST_VERSION 渲染选项
+        const renderCategoryOptions = () => {
+          const categorySelect = $(DOM_ID_INPUT_CATEGORY);
+          const optionsArray = CATE_LIST;
+          categorySelect.empty();
+          optionsArray.forEach((item) => {
+            categorySelect.append(
+              `<option value="${item.value}">${item.name}</option>`
+            );
+          });
+          categorySelect.val(node.category);
+        };
+
+        $(DOM_ID_INPUT_TAGS).typedInput({
+          type: "json",
+          types: ["json"],
+        });
+
+        $(DOM_ID_INPUT_STATE).typedInput({
+          type: "json",
+          types: ["json"],
+        });
+
+        renderCategoryOptions();
+        if (node.category) {
+          $(DOM_ID_INPUT_CATEGORY).val(node.category);
+        }
+
+        globalVue && globalVue.$destroy();
+        globalVue = await createActionByVue({
+          nodeRed: node,
+          capabilityList: CAPA_LIST,
+          capabilityListV1: CAPA_LIST_V1,
+          capabilityListV2: CAPA_LIST_V2,
+        });
+        $(SERVER_DOM_NAME).on("change", async () => {
+          const server = $(SERVER_DOM_NAME).val();
+          if (server !== SERVER_EMPTY) {
+            const bridgeInfo = await getBridgeInfo({ nodeRed: node });
+            if (bridgeInfo?.data?.fw_version) {
+              const { fw_version } = bridgeInfo.data;
+              // 开放接口升级成V2是在版本：2.1.0
+              IHOST_VERSION =
+                compareVersion(fw_version, "2.1.0") >= 0
+                  ? IHOST_VERSION_V2
+                  : IHOST_VERSION_V1;
+              globalVue?.setIHostVersion(IHOST_VERSION);
+            }
+          } else {
+            IHOST_VERSION = IHOST_VERSION_V1;
+            globalVue?.setIHostVersion(IHOST_VERSION);
+          }
+          globalVue?.initCapabilityEditData();
+        });
+      },
+      oneditsave() {
+        let editData = globalVue.getCapabilitiesData();
+        let saveData = [];
+        editData.forEach((item) => {
+          if (IHOST_VERSION === IHOST_VERSION_V1) {
+            delete item.settings;
+            // ihost 处于 V1, 给能力一个默认的权限
+            item.permission = getDefaultCapabilityPermission(item.capability);
+          } else {
+            if (!item.settings || item.settings === "{}") delete item.settings;
+          }
+          const { capability, toggleNum, permission, settings, name } = item;
+          if (["toggle", "multi-press"].includes(capability)) {
+            saveData.push(
+              ...Array.from({ length: toggleNum }, (_, i) => ({
+                capability,
+                permission,
+                name: `${i + 1}`,
+              }))
+            );
+          } else if ("toggle-startup" === capability) {
+            const toggleStartupNum =
+              editData.find((item) => item.capability === "toggle")
+                ?.toggleNum ?? 1;
+            saveData.push(
+              ...Array.from({ length: toggleStartupNum }, (_, i) => ({
+                capability,
+                permission,
+                name: `${i + 1}`,
+              }))
+            );
+          } else {
+            const saveDataItem = { capability, permission };
+            if (settings) saveDataItem.settings = settings;
+            if (name) saveDataItem.name = name;
+            saveData.push(saveDataItem);
+          }
+        });
+        $(DOM_ID_INPUT_CAPABILITIES_V2).val(JSON.stringify(saveData));
+        $(DOM_ID_INPUT_CAPABILITIES).val("null");
+      },
     });
 
     /** 创建 Vue 实例 */
     async function createActionByVue(params = {}) {
-        const { nodeRed, capabilityList , capabilityListV1, capabilityListV2 } = params;
-        const createCapabilityItem = (params) => {
-            const { capability = '', permission = '0000', settings = '{}', name = void 0, toggleNum = null } = params || {};
-            const item = { capability, permission, settings, name };
-            if (toggleNum) item.toggleNum = toggleNum;
-            return item;
-        };
-        return new Vue({
-            el: '#register-device-app',
-            template: `
+      const { nodeRed, capabilityList, capabilityListV1, capabilityListV2 } =
+        params;
+      const createCapabilityItem = (params) => {
+        const {
+          capability = "",
+          permission = "0000",
+          settings = "{}",
+          name = void 0,
+          toggleNum = null,
+        } = params || {};
+        const item = { capability, permission, settings, name };
+        if (toggleNum) item.toggleNum = toggleNum;
+        return item;
+      };
+      return new Vue({
+        el: "#register-device-app",
+        template: `
                 <div class="capability-selector-wrapper">
                     <capability-selector
                         v-for="(item, index) in editData"
@@ -824,229 +901,298 @@ Object.entries(componentList).forEach(([name, component]) => {
                     />
                 </div>
             `,
-            data: {
-                nodeRed,
-                capabilityList,
-                capabilityListV1,
-                capabilityListV2,
-                editData: [],
-                ihostVersion: IHOST_VERSION,
-                requiredNameCapabilities: [
-                    'mode',
-                    'thermostat-mode-detect',
-                    'power-percentage'
-                ]
-            },
-            computed: {
-                selectedCapability() {
-                    return this.editData.map(item => item.capability);
-                },
-                capabilitiesOptions() {
-                    const data = this.ihostVersion === IHOST_VERSION_V1 ? [...this.capabilityList, ...this.capabilityListV1] : [...this.capabilityList, ...this.capabilityListV2];
-                    if (!this.selectedCapability.includes('toggle')) {
-                        _.remove(data, (item) => item.value === 'toggle-startup');
-                    }
-                    return data
-                        .sort((a, b) => {
-                            const { prioriy: aPrioriy = Infinity } = a;
-                            const { prioriy: bPrioriy = Infinity } = b;
-                            return aPrioriy - bPrioriy;
-                        })
-                        .map(item => {
-                            // toggle, toggle-startup, multi-press 只能选一个，其余多选
-                            const isRadioOption = ['toggle', 'multi-press', 'toggle-startup'].includes(item.value);
-                            return {
-                                label: item.name,
-                                value: item.value,
-                                disabled: isRadioOption ? this.selectedCapability.includes(item.value) : false
-                            };
-                        });
-                }
-            },
-            watch: {
-                selectedCapability(capabilities, oldCapabilities) {
-                    // 已选中的能力之前有 toggle，之后无 toggle 则删除 toggle-startup
-                    if (oldCapabilities.includes('toggle') && !capabilities.includes('toggle')) {
-                        _.remove(this.editData, (item) => item.capability === 'toggle-startup');
-                    }
-                }
-            },
-            methods: {
-                setIHostVersion(ihostVersion) {
-                    this.ihostVersion = ihostVersion;
-                },
-                changeCapability(index, capability) {
-                    this.editData[index].capability = capability;
-                },
-                changePermission(index, permission) {
-                    this.editData[index].permission = permission;
-                },
-                changeSettings(index, settings) {
-                    this.editData[index].settings = settings;
-                },
-                changeToggleNum(index, toggleNum) {
-                    this.$set(this.editData[index], 'toggleNum', toggleNum);
-                },
-                addOrRemoveCapabilityItem(index, capability) {
-                    if (index === 0) {
-                        if (this.capabilitiesOptions.every(item => item.disabled)) return;
-                        const firstNotDisabledCapability = this.capabilitiesOptions.find(item => !item.disabled);
-                        this.editData.push(createCapabilityItem({ capability: firstNotDisabledCapability.value }));
-                    } else {
-                        this.editData.splice(index, 1);
-                    }
-                },
-                /**
-                 * initVersion = 'V1' 时，从 node-input-capabilities 中初始化数据，
-                 * initVersion = 'V2' 时，从 node-input-capabilities_v2 中初始化数据
-                 * */
-                initCapabilityEditDataByVersion(initVersion) {
-                    const capaStrData = initVersion === IHOST_VERSION_V2 ? $(DOM_ID_INPUT_CAPABILITIES_V2).val() : $(DOM_ID_INPUT_CAPABILITIES).val();
-                    if (!capaStrData || capaStrData === 'null') return;
-                    const jsonData = JSON.parse(capaStrData);
-                    this.editData.splice(0, this.editData.length);
-                    if (initVersion === IHOST_VERSION_V1) {
-                        const editData = [];
-                        const v2Data = capabilitiesTransform.frontEndDataToV2Capability(jsonData);
-                        v2Data.forEach(item => {
-                            const { capability, permission, settings } = item;
-                            switch (capability) {
-                                case 'multi-press':
-                                case 'toggle': {
-                                    const index = editData.findIndex(item => item.capability === capability);
-                                    if (index >= 0) {
-                                        editData[index].toggleNum ++;
-                                    } else {
-                                        editData.push(createCapabilityItem({ capability, permission, settings, toggleNum: 1 }));
-                                    }
-                                    break;
-                                }
-                                case 'detect': {
-                                    // detect 能力结合 category 转换成 V2 新能力
-                                    const category = $(DOM_ID_INPUT_CATEGORY).val();
-                                    const detectToV2CapabilityMap = {
-                                        'waterLeakDetector': 'water-leak',
-                                        'smokeDetector': 'smoke',
-                                        'contactSensor': 'contact',
-                                        'motionSensor': 'motion',
-                                    }
-                                    const v2Capability = detectToV2CapabilityMap[category] || capability;
-                                    editData.push(createCapabilityItem({ capability: v2Capability, permission, settings }));
-                                    break;
-                                }
-                                default: {
-                                    editData.push(createCapabilityItem({ capability, permission, settings }));
-                                }
-                            }
-                        });
-                        this.editData.push(...editData);
-                    } else if (initVersion === IHOST_VERSION_V2) {
-                        const editData = [];
-                        jsonData.forEach(item => {
-                            const { capability, permission, settings, name } = item;
-                            if (['toggle', 'multi-press'].includes(capability)) {
-                                const index = editData.findIndex(item => item.capability === capability);
-                                if (index >= 0) {
-                                    editData[index].toggleNum ++;
-                                } else {
-                                    editData.push(createCapabilityItem({ capability, permission, settings, toggleNum: 1 }));
-                                }
-                            } else if ('toggle-startup' === capability) {
-                                const index = editData.findIndex(item => item.capability === capability);
-                                if (index < 0) {
-                                    editData.push(createCapabilityItem({ capability, permission, settings }));
-                                }
-                            } else {
-                                editData.push(createCapabilityItem({ capability, permission, settings, name }));
-                            }
-                        });
-                        this.editData.push(...editData);
-                    }
-                },
-                initCapabilityEditData() {
-                    const v1Capabilities = $(DOM_ID_INPUT_CAPABILITIES).val();
-                    const v2Capabilities = $(DOM_ID_INPUT_CAPABILITIES_V2).val();
-
-                    if (!!v2Capabilities && v2Capabilities !== 'null') {
-                        this.initCapabilityEditDataByVersion(IHOST_VERSION_V2);
-                    } else {
-                        this.initCapabilityEditDataByVersion(IHOST_VERSION_V1);
-                    }
-
-                    if (this.editData.length === 0) {
-                        this.editData.push(createCapabilityItem());
-                    }
-                },
-                getCapabilitiesData() {
-                    return JSON.parse(JSON.stringify(this.editData));
-                }
+        data: {
+          nodeRed,
+          capabilityList,
+          capabilityListV1,
+          capabilityListV2,
+          editData: [],
+          ihostVersion: IHOST_VERSION,
+          requiredNameCapabilities: [
+            "mode",
+            "thermostat-mode-detect",
+            "power-percentage",
+          ],
+        },
+        computed: {
+          selectedCapability() {
+            return this.editData.map((item) => item.capability);
+          },
+          capabilitiesOptions() {
+            const data =
+              this.ihostVersion === IHOST_VERSION_V1
+                ? [...this.capabilityList, ...this.capabilityListV1]
+                : [...this.capabilityList, ...this.capabilityListV2];
+            if (!this.selectedCapability.includes("toggle")) {
+              _.remove(data, (item) => item.value === "toggle-startup");
             }
-        });
+            return data
+              .sort((a, b) => {
+                const { prioriy: aPrioriy = Infinity } = a;
+                const { prioriy: bPrioriy = Infinity } = b;
+                return aPrioriy - bPrioriy;
+              })
+              .map((item) => {
+                // toggle, toggle-startup, multi-press 只能选一个，其余多选
+                const isRadioOption = [
+                  "toggle",
+                  "multi-press",
+                  "toggle-startup",
+                ].includes(item.value);
+                return {
+                  label: item.name,
+                  value: item.value,
+                  disabled: isRadioOption
+                    ? this.selectedCapability.includes(item.value)
+                    : false,
+                };
+              });
+          },
+        },
+        watch: {
+          selectedCapability(capabilities, oldCapabilities) {
+            // 已选中的能力之前有 toggle，之后无 toggle 则删除 toggle-startup
+            if (
+              oldCapabilities.includes("toggle") &&
+              !capabilities.includes("toggle")
+            ) {
+              _.remove(
+                this.editData,
+                (item) => item.capability === "toggle-startup"
+              );
+            }
+          },
+        },
+        methods: {
+          setIHostVersion(ihostVersion) {
+            this.ihostVersion = ihostVersion;
+          },
+          changeCapability(index, capability) {
+            this.editData[index].capability = capability;
+          },
+          changePermission(index, permission) {
+            this.editData[index].permission = permission;
+          },
+          changeSettings(index, settings) {
+            this.editData[index].settings = settings;
+          },
+          changeToggleNum(index, toggleNum) {
+            this.$set(this.editData[index], "toggleNum", toggleNum);
+          },
+          addOrRemoveCapabilityItem(index, capability) {
+            if (index === 0) {
+              if (this.capabilitiesOptions.every((item) => item.disabled))
+                return;
+              const firstNotDisabledCapability = this.capabilitiesOptions.find(
+                (item) => !item.disabled
+              );
+              this.editData.push(
+                createCapabilityItem({
+                  capability: firstNotDisabledCapability.value,
+                })
+              );
+            } else {
+              this.editData.splice(index, 1);
+            }
+          },
+          /**
+           * initVersion = 'V1' 时，从 node-input-capabilities 中初始化数据，
+           * initVersion = 'V2' 时，从 node-input-capabilities_v2 中初始化数据
+           * */
+          initCapabilityEditDataByVersion(initVersion) {
+            const capaStrData =
+              initVersion === IHOST_VERSION_V2
+                ? $(DOM_ID_INPUT_CAPABILITIES_V2).val()
+                : $(DOM_ID_INPUT_CAPABILITIES).val();
+            if (!capaStrData || capaStrData === "null") return;
+            const jsonData = JSON.parse(capaStrData);
+            this.editData.splice(0, this.editData.length);
+            if (initVersion === IHOST_VERSION_V1) {
+              const editData = [];
+              const v2Data =
+                capabilitiesTransform.frontEndDataToV2Capability(jsonData);
+              v2Data.forEach((item) => {
+                const { capability, permission, settings } = item;
+                switch (capability) {
+                  case "multi-press":
+                  case "toggle": {
+                    const index = editData.findIndex(
+                      (item) => item.capability === capability
+                    );
+                    if (index >= 0) {
+                      editData[index].toggleNum++;
+                    } else {
+                      editData.push(
+                        createCapabilityItem({
+                          capability,
+                          permission,
+                          settings,
+                          toggleNum: 1,
+                        })
+                      );
+                    }
+                    break;
+                  }
+                  case "detect": {
+                    // detect 能力结合 category 转换成 V2 新能力
+                    const category = $(DOM_ID_INPUT_CATEGORY).val();
+                    const detectToV2CapabilityMap = {
+                      waterLeakDetector: "water-leak",
+                      smokeDetector: "smoke",
+                      contactSensor: "contact",
+                      motionSensor: "motion",
+                    };
+                    const v2Capability =
+                      detectToV2CapabilityMap[category] || capability;
+                    editData.push(
+                      createCapabilityItem({
+                        capability: v2Capability,
+                        permission,
+                        settings,
+                      })
+                    );
+                    break;
+                  }
+                  default: {
+                    editData.push(
+                      createCapabilityItem({ capability, permission, settings })
+                    );
+                  }
+                }
+              });
+              this.editData.push(...editData);
+            } else if (initVersion === IHOST_VERSION_V2) {
+              const editData = [];
+              jsonData.forEach((item) => {
+                const { capability, permission, settings, name } = item;
+                if (["toggle", "multi-press"].includes(capability)) {
+                  const index = editData.findIndex(
+                    (item) => item.capability === capability
+                  );
+                  if (index >= 0) {
+                    editData[index].toggleNum++;
+                  } else {
+                    editData.push(
+                      createCapabilityItem({
+                        capability,
+                        permission,
+                        settings,
+                        toggleNum: 1,
+                      })
+                    );
+                  }
+                } else if ("toggle-startup" === capability) {
+                  const index = editData.findIndex(
+                    (item) => item.capability === capability
+                  );
+                  if (index < 0) {
+                    editData.push(
+                      createCapabilityItem({ capability, permission, settings })
+                    );
+                  }
+                } else {
+                  editData.push(
+                    createCapabilityItem({
+                      capability,
+                      permission,
+                      settings,
+                      name,
+                    })
+                  );
+                }
+              });
+              this.editData.push(...editData);
+            }
+          },
+          initCapabilityEditData() {
+            const v1Capabilities = $(DOM_ID_INPUT_CAPABILITIES).val();
+            const v2Capabilities = $(DOM_ID_INPUT_CAPABILITIES_V2).val();
+
+            if (!!v2Capabilities && v2Capabilities !== "null") {
+              this.initCapabilityEditDataByVersion(IHOST_VERSION_V2);
+            } else {
+              this.initCapabilityEditDataByVersion(IHOST_VERSION_V1);
+            }
+
+            if (this.editData.length === 0) {
+              this.editData.push(createCapabilityItem());
+            }
+          },
+          getCapabilitiesData() {
+            return JSON.parse(JSON.stringify(this.editData));
+          },
+        },
+      });
     }
 
     /** 获取网关的信息 */
     async function getBridgeInfo(params) {
-        const { nodeRed } = params;
-        const server = $(SERVER_DOM_NAME).val();
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                type: 'POST',
-                url: 'ewelink-cube-api-v1/bridge',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify({ ip: server }),
-                success(res) {
-                    resolve(res);
-                },
-                error(error) {
-                    resolve(null);
-                }
-            });
-        })
+      const { nodeRed } = params;
+      const server = $(SERVER_DOM_NAME).val();
+      return new Promise((resolve, reject) => {
+        $.ajax({
+          type: "POST",
+          url: "ewelink-cube-api-v1/bridge",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({ ip: server }),
+          success(res) {
+            resolve(res);
+          },
+          error(error) {
+            resolve(null);
+          },
+        });
+      });
     }
 
     function getDefaultCapabilityPermission(capability) {
-        const v2Data = capabilitiesTransform.frontEndDataToV2Capability({ toggleNum: 1, values: [capability] });
-        const defaultPermission = _.get(v2Data, [0, 'permission'], '0000');
-        return defaultPermission;
+      const v2Data = capabilitiesTransform.frontEndDataToV2Capability({
+        toggleNum: 1,
+        values: [capability],
+      });
+      const defaultPermission = _.get(v2Data, [0, "permission"], "0000");
+      return defaultPermission;
     }
-})();
+  })();
 </script>
 
 <style>
-    .form-row #capa-list .add-item-btn,
-    .form-row #capa-list .del-item-btn {
-        display: inline-block;
-        color: white;
-        font-size: 22px;
-        width: 28px;
-        height: 28px;
-        line-height: 28px;
-        text-align: center;
-        border-radius: 50%;
-        margin-left: 8px;
-        vertical-align: middle;
-        cursor: pointer;
-    }
-    .form-row #capa-list .add-item-btn {
-        background-color: #333bff;
-    }
-    .form-row #capa-list .del-item-btn {
-        background-color: #ff335d;
-    }
-    .require{
-        position:absolute;
-        left: -8px;
-        top: 10px;
-        color: red;
-        font-size: 20px;
-    }
+  .form-row #capa-list .add-item-btn,
+  .form-row #capa-list .del-item-btn {
+    display: inline-block;
+    color: white;
+    font-size: 22px;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  .form-row #capa-list .add-item-btn {
+    background-color: #333bff;
+  }
+  .form-row #capa-list .del-item-btn {
+    background-color: #ff335d;
+  }
+  .require {
+    position: absolute;
+    left: -8px;
+    top: 10px;
+    color: red;
+    font-size: 20px;
+  }
 
-    .form-row .el-input, .form-row .el-select .el-input input {
-        width: 100%;
-        background-color: #fff;
-        color: #606266;
-    }
-    .form-row .el-input input[readonly="readonly"], .form-row .el-select .el-input input[readonly="readonly"] {
-        cursor: pointer;
-    }
+  .form-row .el-input,
+  .form-row .el-select .el-input input {
+    width: 100%;
+    background-color: #fff;
+    color: #606266;
+  }
+  .form-row .el-input input[readonly="readonly"],
+  .form-row .el-select .el-input input[readonly="readonly"] {
+    cursor: pointer;
+  }
 </style>
