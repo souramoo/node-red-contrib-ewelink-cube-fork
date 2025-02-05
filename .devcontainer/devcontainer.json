@@ -1,0 +1,12 @@
+{
+    "name": "Node-RED devbox",
+    "image": "nodered/node-red",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            }
+        }
+    },
+    "forwardPorts": [1880, 3000]
+}
